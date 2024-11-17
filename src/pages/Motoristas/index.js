@@ -60,9 +60,12 @@ const Motoristas = () => {
     //Pesquisar Motoristas na tabela.
     const handleSearch = (e) => setFiltro(e.target.value);
         
-    const motoristaFiltrado = motoristas.filter((moto) =>
+    /*const motoristaFiltrado = motoristas.filter((moto) =>
        moto.motoristaNome.toLowerCase().includes(filtro.toLowerCase())
-    );
+    );*/
+    const motoristaFiltrado = Array.isArray(motoristas) 
+    ? motoristas.filter((moto) => moto.motoristaNome.toLowerCase().includes(filtro.toLowerCase())) 
+    : [];
       
     //.........................API...............................
     useEffect(()=>{
@@ -83,9 +86,15 @@ const Motoristas = () => {
             'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
           },
         });
-        setMotoristas(response.data.motorista);
+        // Garanta que 'motorista' seja um array antes de setá-lo no estado
+        if (Array.isArray(response.data.motorista)) {
+          setMotoristas(response.data.motorista);
+        } else {
+          setMotoristas([]); // Previna erros futuros
+        }
       } catch (error) {
         toast.error("Erro: Não foi possível carregar a lista de motoristas. Detalhes: "+error);
+        setMotoristas([]); // Previna erros futuros
       }finally{
         setLoading(false);
       };
@@ -202,7 +211,8 @@ const Motoristas = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {motoristaFiltrado.map((motorista) => {
+                  {motoristaFiltrado?.length > 0 ? (
+                    motoristaFiltrado.map((motorista) => {
                       return (
                         <TableRow key={motorista.motoristaId}>
                           <TableCell>{motorista.motoristaId}</TableCell>
@@ -223,8 +233,13 @@ const Motoristas = () => {
                             </Tooltip>
                           </TableCell>
                         </TableRow>
-                      );
-                    })}
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center">Nenhum motorista encontrado.</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
