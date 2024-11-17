@@ -64,9 +64,13 @@ const Usuarios = () => {
   //Pesquisar Motoristas
   const handleSearch = (e) => setFiltro(e.target.value);
         
-  const usuarioFiltrado = users.filter((user) =>
+  /*const usuarioFiltrado = users.filter((user) =>
      user.userNome.toLowerCase().includes(filtro.toLowerCase())
-  );
+  );*/
+
+  const usuarioFiltrado = Array.isArray(users) 
+    ? users.filter((user) => user.userNome.toLowerCase().includes(filtro.toLowerCase())) 
+    : [];
 
   //UseEffect
   useEffect(() => {
@@ -88,10 +92,17 @@ const Usuarios = () => {
           headers: {
             'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
           },
-        }); // Substitua pela sua URL de API
-        setUsers(response.data.allUsers); // Armazena a lista de usuários no estado.
+        }); 
+        // Garanta que 'users' seja um array antes de setá-lo no estado
+        if (Array.isArray(response.data.allUsers)) {
+          setUsers(response.data.allUsers);
+          console.log(response.data.allUsers);
+        } else {
+          setUsers([]); // Previna erros futuros
+        }
       } catch (error) {
         toast.error("Erro: Não foi possível carregar a lista de usuários. Verifique os parametros da API."+error);
+        setUsers([]); // Previna erros futuros
       } finally {
         setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
     };
@@ -214,7 +225,8 @@ const Usuarios = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {usuarioFiltrado.map((user) => {
+                    {usuarioFiltrado?.length > 0 ? (
+                      usuarioFiltrado.map((user) => {
                         return (
                           <TableRow key={user.userId}>
                             <TableCell>{user.userId}</TableCell>
@@ -240,7 +252,12 @@ const Usuarios = () => {
                             </TableCell>
                           </TableRow>
                         );
-                      })}
+                      })
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center">Nenhum usuário encontrado.</TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>
