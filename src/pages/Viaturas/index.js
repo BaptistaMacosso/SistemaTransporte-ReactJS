@@ -3,7 +3,8 @@ import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,IconButton,
-         Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2
+         Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
+         CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Check, AirlineStops } from '@mui/icons-material';
 import { toast } from 'react-toastify';
@@ -24,6 +25,7 @@ const Viaturas = () => {
   const [filtro, setFiltro] = useState('');
   const [viaturas, setViaturas] = useState([]);
   const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
+  const [loading, setLoading] = useState(true); // Estado para gerenciar o carregamento.
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -109,7 +111,8 @@ const Viaturas = () => {
   //Listar Viaturas
   const fetchViaturas = async() =>{
     try{
-      const response = await axios.get('http://localhost:3050/api/viatura/listar',{
+      setLoading(true);
+      const response = await axios.get('sistema-transporte-backend.vercel.app/api/viatura/listar',{
         headers:{
           'Authorization': `Bearer ${token}`,
         }
@@ -117,13 +120,15 @@ const Viaturas = () => {
       setViaturas(response.data.viatura); 
     }catch(error){
         toast.error('erro: Não foi possível carregar a lista de viaturas. Detalhes: '+error);
-    }
+    }finally {
+      setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
+    };
   };
 
   //Salvar Viatura
   const CriarViatura = async() =>{
     try{
-      const response = await axios.post('http://localhost:3050/api/viatura/registar',novaViatura,{
+      const response = await axios.post('sistema-transporte-backend.vercel.app/api/viatura/registar',novaViatura,{
         headers:{
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -161,7 +166,7 @@ const Viaturas = () => {
       return;
     } else {
       try{
-        const response = await axios.put(`http://localhost:3050/api/viatura/update/${novaViatura.viaturaId}`,
+        const response = await axios.put(`sistema-transporte-backend.vercel.app/api/viatura/update/${novaViatura.viaturaId}`,
           novaViatura,{
           headers:{
             'Authorization': `Bearer ${token}`,
@@ -186,7 +191,7 @@ const Viaturas = () => {
   const excluirViatura = async(viatura) =>{
     if(window.confirm('Tem certeza que deseja excluir esta viatura?')){
       try{
-        const response = await axios.delete(`http://localhost:3050/api/viatura/delete/${viatura.viaturaId}`,{
+        const response = await axios.delete(`sistema-transporte-backend.vercel.app/api/viatura/delete/${viatura.viaturaId}`,{
           headers:{
             'Authorization': `Bearer ${token}`,
           }
@@ -361,6 +366,7 @@ const Viaturas = () => {
           </Dialog>
           <Box marginBottom={3} />
           {/* Tabela de Viaturas */}
+          {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
           <Grid2 item xs={12}>
           <Box marginBottom={2}/>
             <Card>
@@ -413,6 +419,7 @@ const Viaturas = () => {
               </TableContainer>
             </Card>
           </Grid2>
+          )} {/*Fim do loading*/ }
         </Box>
       </Box>
     </>

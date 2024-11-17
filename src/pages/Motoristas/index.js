@@ -3,7 +3,8 @@ import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,
-  IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2
+  IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
+  CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { AuthContext } from '../../contexts/auth';
@@ -76,7 +77,7 @@ const Motoristas = () => {
     const fetchMotoristas = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3050/api/motorista/listar',
+        const response = await axios.get('sistema-transporte-backend.vercel.app/api/motorista/listar',
           {
           headers: {
             'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
@@ -99,7 +100,7 @@ const Motoristas = () => {
             toast.error('Preencha todos os campos');
         }else{
           try{
-            const response = await axios.post('http://localhost:3050/api/motorista/registar',
+            const response = await axios.post('sistema-transporte-backend.vercel.app/api/motorista/registar',
             NovoMotorista,
             {
               headers: {
@@ -122,7 +123,7 @@ const Motoristas = () => {
     //Editar Motorista
     const handleEdit = async () =>{
       try{
-        const response = await axios.put(`http://localhost:3050/api/motorista/update/${NovoMotorista.motoristaId}`,
+        const response = await axios.put(`sistema-transporte-backend.vercel.app/api/motorista/update/${NovoMotorista.motoristaId}`,
         NovoMotorista,
         {
           headers: {
@@ -143,7 +144,7 @@ const Motoristas = () => {
     const handleDelete = async (motorista) => {
       if (window.confirm('Tem certeza que deseja excluir este Motorista?')) {
         try {
-          const response = await axios.delete(`http://localhost:3050/api/motorista/delete/${motorista.motoristaId}`,
+          const response = await axios.delete(`sistema-transporte-backend.vercel.app/api/motorista/delete/${motorista.motoristaId}`,
             {
               headers:{
                 'Authorization': `Bearer ${token}`,
@@ -183,6 +184,7 @@ const Motoristas = () => {
           </Grid2>
           {/* Tabela de Viaturas */}
           <Box marginBottom={3}/>
+          {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
           <Grid2 item xs={12}>
           <Box marginBottom={2}/>
             <Card>
@@ -228,6 +230,8 @@ const Motoristas = () => {
               </TableContainer>
             </Card>
           </Grid2>
+          )} {/*Fim do loading*/ }
+
           {/* Modal de Adicionar Nova Viatura */}
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>{isEdit===true ? 'Editar Motorista' : 'Adicionar Novo Motorista' }</DialogTitle>

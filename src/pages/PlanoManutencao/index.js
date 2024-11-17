@@ -7,7 +7,8 @@ import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,Tabl
          FormControl,
          InputLabel,
          Select,
-         MenuItem
+         MenuItem,
+         CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -17,15 +18,16 @@ import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const PlanoManutencao = () => {
+  const [loading, setLoading] = useState(true); // Estado para gerenciar o carregamento.
   const [planoManutencao, setPlanoManutencao] = useState([]);
   const { token } = useContext(AuthContext) ||{ token: localStorage.getItem('token') };
   const [novoPlanManutencao, setNovoPlanoManutencao] = useState({
     id: null, 
+    viaturaId: '',
     dataManutencao: '', 
     descricao: '', 
     custoPrevisto: '', 
-    status: '', 
-    viaturaId: ''
+    status: '' 
   });
   const { isAuthenticated, Logout } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
@@ -51,21 +53,21 @@ const PlanoManutencao = () => {
       setIsEdit(false);
       setNovoPlanoManutencao({ 
         id: null, 
+        viaturaId: novoPlanManutencao.viaturaId || '',
         dataManutencao: novoPlanManutencao.dataManutencao || '', 
         descricao: novoPlanManutencao.descricao || '', 
         custoPrevisto: novoPlanManutencao.custoPrevisto || '', 
-        status: novoPlanManutencao.status || '', 
-        viaturaId: novoPlanManutencao.viaturaId || '',
+        status: novoPlanManutencao.status || '' 
       });
     } else {
       setIsEdit(true);
       setNovoPlanoManutencao({ 
         id: novoPlanManutencao.id, 
+        viaturaId: novoPlanManutencao.viaturaId,
         dataManutencao: novoPlanManutencao.dataManutencao, 
         descricao: novoPlanManutencao.descricao, 
         custoPrevisto: novoPlanManutencao.custoPrevisto, 
-        status: novoPlanManutencao.status, 
-        viaturaId: novoPlanManutencao.viaturaId,
+        status: novoPlanManutencao.status
       });
     }
     setOpen(true);
@@ -74,7 +76,7 @@ const PlanoManutencao = () => {
   const handleClose = () => {
     setIsEdit(false);
     setOpen(false);
-    setNovoPlanoManutencao({ id: null, dataManutencao: '', descricao: '', custoPrevisto: '', status: '', viaturaId: ''});
+    setNovoPlanoManutencao({ id: null, viaturaId: '', dataManutencao: '', descricao: '', custoPrevisto: '', status: ''});
   }
     //................................API.............................
     useEffect(() => {
@@ -91,15 +93,21 @@ const PlanoManutencao = () => {
     //Listagem de Planos de Manutenção.
     const fetchPlanoManutencao = async () => {
       try {
-        const response = await axios.get('http://localhost:3050/api/planomanutencao/listar',{
+        setLoading(true);
+        const response = await axios.get('sistema-transporte-backend.vercel.app/api/planomanutencao/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
         setPlanoManutencao(response.data.allplanos);
       }catch(error) {
+        console.log(error);
         if (error.response.status === 500) {
           toast.error(error.response.data.message);
+        }else if (error.response.status === 401) {
+          toast.error(error.response.data.message);
         }
-      }
+      }finally {
+        setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
+      };
     };
 
     //Update Planos
@@ -108,20 +116,22 @@ const PlanoManutencao = () => {
 
         handleClose();
       } catch (error) {
-        toast.error("Erro: Não foi possível editar o plano de manutenção. Detalhes: "+error);
+        if (error.response.status === 500) {
+          toast.error(error.response.data.message);
+        }
       }
     };
 
     //Deletar Planos
     const handleDelete = async (plano) => {
-      console.log('Código: '+plano.id);
+      
       try {
         if (window.confirm('Tem certeza que deseja excluir este plano de manutenção?')) {
-          const response = await axios.delete(`http://localhost:3050/api/planomanutencao/delete/${plano.id}`,{
+          const response = await axios.delete(`sistema-transporte-backend.vercel.app/api/planomanutencao/delete/${plano.id}`,{
             headers:{ 'Authorization': `Bearer ${token}`, }
           });
           if(response.status === 201){
-            toast.success("Plano de manutenção excluído com sucesso!");
+            toast.success(response.data.message);
             fetchPlanoManutencao();
           }
         };
@@ -144,7 +154,7 @@ const PlanoManutencao = () => {
       } else {
         //Salvar
         try {
-          const response = await axios.post('http://localhost:3050/api/planomanutencao/registar',
+          const response = await axios.post('sistema-transporte-backend.vercel.app/api/planomanutencao/registar',
           novoPlanManutencao, 
           {
             headers:{ 
@@ -171,7 +181,7 @@ const PlanoManutencao = () => {
     //Listagem de viaturas
     const listagemViaturas = async () =>{
       try {
-        const response = await axios.get('http://localhost:3050/api/viatura/listar',{
+        const response = await axios.get('sistema-transporte-backend.vercel.app/api/viatura/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
         setViaturas(response.data.viatura);
@@ -202,9 +212,11 @@ const PlanoManutencao = () => {
               Novo Plano
             </Button>
           </Grid2>
-
+          <Box marginBottom={3} />
           {/* Tabela de Viaturas */}
+          {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
           <Grid2 item xs={12}>
+          <Box marginBottom={2} />
             <Card>
               <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Plano de Manutenção</Typography>
               <TableContainer component={Paper}>
@@ -255,6 +267,7 @@ const PlanoManutencao = () => {
               </TableContainer>
             </Card>
           </Grid2>
+          )} {/*Fim do loading*/ }
         {/**/}
         {/* Modal de Adicionar Nova Viatura */}
         <Dialog open={open} onClose={handleClose}>

@@ -1,24 +1,36 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,
-  IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2
+  IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
+  CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { differenceInDays, parseISO } from 'date-fns';
+import { AuthContext } from '../../contexts/auth';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { Navigate } from 'react-router-dom';
 
 
 const Manutencao = () => {
-
-    const [viaturas, setViaturas] = useState([
-      { id: 1, placa: 'ABC-1234', modelo: 'Ford Ranger', km: 49500, dataManutencao: '2024-11-20' },
-      { id: 2, placa: 'DEF-5678', modelo: 'Toyota Hilux', km: 47500, dataManutencao: '2024-11-25' },
-      { id: 3, placa: 'GHI-9012', modelo: 'Chevrolet S10', km: 49000, dataManutencao: '2024-11-28' },
-    ]);
+  const [loading, setLoading] = useState(true); // Estado para gerenciar o carregamento.
+  const [manutencao, setManutencao] = useState([]);
+  const { token } = useContext(AuthContext) ||{ token: localStorage.getItem('token') };
+  const [novaManutencao, setNovaManutencao] = useState({
+    id: null, 
+    viaturaId: '',
+    tipoId: '',
+    data: '',
+    quilometragem: '',
+    descricao: '',
+    servicos: '',
+    responsavel: '',
+  });
+  const { isAuthenticated, Logout } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
-    const [novaViatura, setNovaViatura] = useState({ placa: '', modelo: '', km: '', dataManutencao: '' });
     const [filtro, setFiltro] = useState('');
+    const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
 
     const hoje = new Date();
 
@@ -27,21 +39,77 @@ const Manutencao = () => {
 
     const handleChange = (e) => {
       const { name, value } = e.target;
-      setNovaViatura({ ...novaViatura, [name]: value });
-    };
-
-    const adicionarPlano = () => {
-      const novaId = viaturas.length ? viaturas[viaturas.length - 1].id + 1 : 1;
-      setViaturas([...viaturas, { ...novaViatura, id: novaId }]);
-      setNovaViatura({ placa: '', modelo: '', km: '', dataManutencao: '' });
-      handleClose();
+      setNovaManutencao({ ...novaManutencao, [name]: value });
     };
 
     const handleSearch = (e) => setFiltro(e.target.value);
 
-    const viaturasFiltradas = viaturas.filter((viatura) =>
-      viatura.placa.toLowerCase().includes(filtro.toLowerCase())
+    const manutencaoFiltradas = manutencao.filter((manutencao) =>
+      manutencao.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())
     );
+
+    //...................................API........................
+    useEffect(() => {
+      if (!isAuthenticated) {
+        Logout();
+        Navigate('/login');
+      }else{
+        fetchManutencao();
+      }
+    }, [isAuthenticated, Logout]);
+
+    const handleSave = async () => {
+      if (isEdit) {
+        //Editar
+        handleEdit();
+        handleClose();
+        fetchManutencao();
+      } else {
+        //Salvar
+        try {
+        
+        } catch (error) {
+          if(error.response.status === 500){
+            toast.error(error.response.data.message);
+          }else if(error.response.status === 400){
+            toast.error(error.response.data.message);
+          }
+        }
+      }
+      handleClose();
+      fetchManutencao();
+    };
+
+    const handleEdit = async (manutencao) => {
+      try {
+        
+      } catch (error) {
+        if (error.response.status === 500) {
+          toast.error(error.response.data.message);
+        }
+      }
+    };
+
+    const fetchManutencao = async () =>{
+      try {
+        setLoading(true);
+        const response = await axios.get('sistema-transporte-backend.vercel.app/api/manutencao/listar',{
+          headers:{ 'Authorization': `Bearer ${token}`, }
+        });
+        setManutencao(response.data.allmanutencao);
+        console.log(response.data.allmanutencao);
+      }catch(error) {
+        if (error.response.status === 500) {
+          toast.error(error.response.data.message);
+        }
+        else if (error.response.status === 401) {
+          toast.error(error.response.data.message);
+        }
+      }finally {
+        setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
+    };
+    };
+    //..............................................................
 
    return (
     <>
@@ -60,60 +128,69 @@ const Manutencao = () => {
                   sx={{ marginBottom: 2 }}
                 />
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-                  Adicionar Manutenção
+                  Nova Manutenção
                 </Button>
             </Grid2>
+            <Box marginBottom={3} />
             {/* Tabela de Viaturas */}
-            <Grid2 item xs={12}>
-              <Card>
-                <Typography variant="h6" sx={{ padding: 2 }}>Manutenção</Typography>
-                <TableContainer component={Paper}>
-                  <Table aria-label="tabela de manutencao">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Código</TableCell>
-                        <TableCell>Placa</TableCell>
-                        <TableCell>Modelo</TableCell>
-                        <TableCell>Kilometragem</TableCell>
-                        <TableCell>Data de Manutenção</TableCell>
-                        <TableCell align="center">Ações</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {viaturasFiltradas.map((viatura) => {
-                        const diasParaManutencao = differenceInDays(parseISO(viatura.dataManutencao), hoje);
-                        const highlight = diasParaManutencao <= 10 ? { backgroundColor: '#EEEED1' } : {};
-
-                        return (
-                          <TableRow key={viatura.id} style={highlight}>
-                            <TableCell>{viatura.id}</TableCell>
-                            <TableCell>{viatura.placa}</TableCell>
-                            <TableCell>{viatura.modelo}</TableCell>
-                            <TableCell>{viatura.km} km</TableCell>
-                            <TableCell>{viatura.dataManutencao}</TableCell>
-                            <TableCell align="center">
-                              <Tooltip title="Editar">
-                                <IconButton color="primary">
-                                  <EditIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Excluir">
-                                <IconButton color="secondary">
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Card>
-            </Grid2>
+            {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
+              <Grid2 item xs={12}>
+              <Box marginBottom={2} />
+                <Card>
+                  <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Manutenção</Typography>
+                  <TableContainer component={Paper}>
+                    <Table aria-label="tabela de manutencao">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Código</TableCell>
+                          <TableCell>Marca Viatura</TableCell>
+                          <TableCell>Modelo Viatura</TableCell>
+                          <TableCell>Matrícula</TableCell>
+                          <TableCell>Descrição</TableCell>
+                          <TableCell>Data da Manutenção</TableCell>
+                          <TableCell>Quilometragem Prevista</TableCell>
+                          <TableCell>Tipo</TableCell>
+                          <TableCell>Responsável</TableCell>
+                          <TableCell align="center">Ações</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {manutencaoFiltradas.map((manutencao) => {
+                          return (
+                            <TableRow key={manutencao.id} >
+                              <TableCell>{manutencao.id}</TableCell>
+                              <TableCell>{manutencao.viatura.viaturaMarca}</TableCell>
+                              <TableCell>{manutencao.viatura.viaturaModelo}</TableCell>
+                              <TableCell>{manutencao.viatura.viaturaMatricula}</TableCell>
+                              <TableCell>{manutencao.descricao}</TableCell>
+                              <TableCell>{manutencao.data}</TableCell>
+                              <TableCell>{manutencao.quilometragem}</TableCell>
+                              <TableCell>{manutencao.tipo.nome}</TableCell>
+                              <TableCell>{manutencao.responsavel}</TableCell>
+                              <TableCell align="center">
+                                <Tooltip title="Editar">
+                                  <IconButton color="primary">
+                                    <EditIcon />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Excluir">
+                                  <IconButton color="secondary">
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Card>
+              </Grid2>
+            )} {/*Fim do loading*/ }
             {/* Modal de Adicionar Nova Viatura */}
             <Dialog open={open} onClose={handleClose}>
-              <DialogTitle>Adicionar Nova Manutenção</DialogTitle>
+              <DialogTitle>{isEdit===true ? 'Editar Manutenção' : 'Nova Manutenção' }</DialogTitle>
               <DialogContent>
                 <TextField
                   autoFocus
@@ -121,7 +198,7 @@ const Manutencao = () => {
                   label="Placa"
                   name="placa"
                   fullWidth
-                  value={novaViatura.placa}
+                  value={novaManutencao.placa}
                   onChange={handleChange}
                 />
                 <TextField
@@ -129,7 +206,7 @@ const Manutencao = () => {
                   label="Modelo"
                   name="modelo"
                   fullWidth
-                  value={novaViatura.modelo}
+                  value={novaManutencao.modelo}
                   onChange={handleChange}
                 />
                 <TextField
@@ -138,7 +215,7 @@ const Manutencao = () => {
                   name="km"
                   type="number"
                   fullWidth
-                  value={novaViatura.km}
+                  value={novaManutencao.km}
                   onChange={handleChange}
                 />
                 <TextField
@@ -147,14 +224,13 @@ const Manutencao = () => {
                   name="dataManutencao"
                   type="date"
                   fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={novaViatura.dataManutencao}
+                  value={novaManutencao.dataManutencao}
                   onChange={handleChange}
                 />
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleClose} color="secondary">Cancelar</Button>
-                <Button onClick={adicionarPlano} color="primary">Adicionar</Button>
+                <Button onClick={handleSave} color="primary">{isEdit===true ? 'Salvar Alterações' : 'Adicionar' }</Button>
               </DialogActions>
             </Dialog>
           {/**/}

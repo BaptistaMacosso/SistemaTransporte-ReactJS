@@ -84,7 +84,7 @@ const Usuarios = () => {
   const fetchUsers = async () => {
       try {
         setLoading(true); // Inicia o carregamento
-        const response = await axios.get('http://localhost:3050/api/auth/listar', {
+        const response = await axios.get('sistema-transporte-backend.vercel.app/api/auth/listar', {
           headers: {
             'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
           },
@@ -112,7 +112,7 @@ const Usuarios = () => {
           toast.warning("Preencha todos os campos");
           return;
         }else{
-            const response = await axios.put(`http://localhost:3050/api/auth/update/${novoUsuario.userId}`, 
+            const response = await axios.put(`sistema-transporte-backend.vercel.app/api/auth/update/${novoUsuario.userId}`, 
               novoUsuario,
               {
                 headers:{
@@ -134,7 +134,7 @@ const Usuarios = () => {
           toast.warning("Preencha todos os campos");
           return;
         }else{
-            const response = await axios.post('http://localhost:3050/api/auth/register', 
+            const response = await axios.post('sistema-transporte-backend.vercel.app/api/auth/register', 
               {
                 userNome: novoUsuario.userNome,
                 userEmail: novoUsuario.userEmail,
@@ -157,7 +157,7 @@ const Usuarios = () => {
   const handleDelete = async (user) => {
     if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
       try {
-        const response = await axios.delete(`http://localhost:3050/api/auth/delete/${user.userId}`);
+        const response = await axios.delete(`sistema-transporte-backend.vercel.app/api/auth/delete/${user.userId}`);
         if(response.status === 201) {
           toast.success(response.data.message);
         }
@@ -197,7 +197,7 @@ const Usuarios = () => {
             </Grid2>
             {/* Tabela de Viaturas */}
             <Box marginBottom={3} />
-            {loading ? ( <CircularProgress /> ) : (
+            {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
             <Grid2 item xs={12}>
             <Box marginBottom={2}/>
               <Card>
