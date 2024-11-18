@@ -21,7 +21,7 @@ const Signin = () => {
         setError("Preencha todos os campos");
         return;
       }else{
-          const response = await axios.post('sistema-transporte-backend.vercel.app/api/auth/login', 
+          const response = await axios.post('/api/auth/login', 
             {
               userEmail: email,
               userPassword: password
