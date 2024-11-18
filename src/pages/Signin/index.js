@@ -25,6 +25,11 @@ const Signin = () => {
             {
               userEmail: email,
               userPassword: password
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
             });
           if(response.status === 201) {
               login(response.data.token);

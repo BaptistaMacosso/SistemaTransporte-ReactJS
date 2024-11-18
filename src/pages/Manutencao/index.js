@@ -97,7 +97,7 @@ const Manutencao = () => {
     const fetchManutencao = async () =>{
       try {
         setLoading(true);
-        const response = await axios.get('sistema-transporte-backend.vercel.app/api/manutencao/listar',{
+        const response = await axios.get('/api/manutencao/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
         // Garanta que 'users' seja um array antes de setá-lo no estado

@@ -116,7 +116,7 @@ const Viaturas = () => {
   const fetchViaturas = async() =>{
     try{
       setLoading(true);
-      const response = await axios.get('sistema-transporte-backend.vercel.app/api/viatura/listar',{
+      const response = await axios.get('/api/viatura/listar',{
         headers:{
           'Authorization': `Bearer ${token}`,
         }
@@ -139,7 +139,7 @@ const Viaturas = () => {
   //Salvar Viatura
   const CriarViatura = async() =>{
     try{
-      const response = await axios.post('sistema-transporte-backend.vercel.app/api/viatura/registar',novaViatura,{
+      const response = await axios.post('/api/viatura/registar',novaViatura,{
         headers:{
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ const Viaturas = () => {
       return;
     } else {
       try{
-        const response = await axios.put(`sistema-transporte-backend.vercel.app/api/viatura/update/${novaViatura.viaturaId}`,
+        const response = await axios.put(`/api/viatura/update/${novaViatura.viaturaId}`,
           novaViatura,{
           headers:{
             'Authorization': `Bearer ${token}`,
@@ -202,7 +202,7 @@ const Viaturas = () => {
   const excluirViatura = async(viatura) =>{
     if(window.confirm('Tem certeza que deseja excluir esta viatura?')){
       try{
-        const response = await axios.delete(`sistema-transporte-backend.vercel.app/api/viatura/delete/${viatura.viaturaId}`,{
+        const response = await axios.delete(`/api/viatura/delete/${viatura.viaturaId}`,{
           headers:{
             'Authorization': `Bearer ${token}`,
           }
