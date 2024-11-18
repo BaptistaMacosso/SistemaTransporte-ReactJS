@@ -195,8 +195,16 @@ const PlanoManutencao = () => {
         const response = await axios.get('sistema-transporte-backend.vercel.app/api/viatura/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
-        setViaturas(response.data.viatura);
+
+        // Garanta que 'users' seja um array antes de setá-lo no estado
+        if (Array.isArray(response.data.viatura)) {
+          setViaturas(response.data.viatura);
+          console.log(response.data.viatura);
+        } else {
+          setViaturas([]); // Previna erros futuros
+        }
       } catch (error) {
+        setViaturas([]); // Previna erros futuros
         toast.error("Erro: Não foi possível listar as viaturas. Detalhes: "+error);
       }
     };
