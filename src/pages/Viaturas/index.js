@@ -81,9 +81,13 @@ const Viaturas = () => {
 
   const handleSearch = (e) => setFiltro(e.target.value);
 
- const viaturasFiltradas = viaturas.filter((carro) =>
+ /*const viaturasFiltradas = viaturas.filter((carro) =>
     carro.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())
-  );
+  );*/
+
+  const viaturasFiltradas = Array.isArray(viaturas) 
+    ? viaturas.filter((carro) => carro.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
+    : [];
 
   const handleSave = ()=>{
     if(isEdit){ 
@@ -117,9 +121,16 @@ const Viaturas = () => {
           'Authorization': `Bearer ${token}`,
         }
       });
-      setViaturas(response.data.viatura); 
+      // Garanta que 'users' seja um array antes de setá-lo no estado
+      if (Array.isArray(response.data.viatura)) {
+        setViaturas(response.data.viatura);
+        console.log(response.data.viatura);
+      } else {
+        setViaturas([]); // Previna erros futuros
+      }
     }catch(error){
         toast.error('erro: Não foi possível carregar a lista de viaturas. Detalhes: '+error);
+        setViaturas([]); // Previna erros futuros
     }finally {
       setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
     };
@@ -385,7 +396,8 @@ const Viaturas = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {viaturasFiltradas.map((viatura) => {
+                  {viaturasFiltradas?.length > 0 ? (
+                    viaturasFiltradas.map((viatura) => {
                       return (
                         <TableRow key={viatura.viaturaId}>
                           <TableCell>{viatura.viaturaId}</TableCell>
@@ -413,7 +425,12 @@ const Viaturas = () => {
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center">Nenhuma viatura encontrada.</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>

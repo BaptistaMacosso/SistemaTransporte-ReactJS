@@ -11,7 +11,7 @@ import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,Tabl
          CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, set } from 'date-fns';
 import axios from 'axios';
 import { AuthContext } from '../../contexts/auth';
 import { Navigate } from 'react-router-dom';
@@ -43,9 +43,13 @@ const PlanoManutencao = () => {
   
   const handleSearch = (e) => setFiltro(e.target.value);
   
-  const planoManutencaoFiltradas = planoManutencao.filter((plano) =>
+ /* const planoManutencaoFiltradas = planoManutencao.filter((plano) =>
     plano.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())
-  );
+  );*/
+
+  const planoManutencaoFiltradas = Array.isArray(planoManutencao) 
+    ? planoManutencao.filter((plano) => plano.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
+    : [];
 
   // Função para abrir o modal para adicionar ou editar
   const handleOpen = (planos) => {
@@ -97,9 +101,16 @@ const PlanoManutencao = () => {
         const response = await axios.get('sistema-transporte-backend.vercel.app/api/planomanutencao/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
-        setPlanoManutencao(response.data.allplanos);
+        
+        // Garanta que 'users' seja um array antes de setá-lo no estado
+        if (Array.isArray(response.data.allplanos)) {
+          setPlanoManutencao(response.data.allplanos);
+          console.log(response.data.allplanos);
+        } else {
+          setPlanoManutencao([]); // Previna erros futuros
+        }
       }catch(error) {
-        console.log(error);
+        setPlanoManutencao([]); // Previna erros futuros
         if (error.response.status === 500) {
           toast.error(error.response.data.message);
         }else if (error.response.status === 401) {
@@ -234,7 +245,8 @@ const PlanoManutencao = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {planoManutencaoFiltradas.map((planos) => {
+                  {planoManutencaoFiltradas?.length > 0 ? (
+                    planoManutencaoFiltradas.map((planos) => {
                       const diasParaManutencao = differenceInDays(parseISO(planos.dataManutencao), hoje);
                       const highlight = diasParaManutencao <= 10 ? { backgroundColor: '#EEEED1' } : {};
 
@@ -261,7 +273,12 @@ const PlanoManutencao = () => {
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    })
+                    ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">Nenhum plano de manutenção encontrado.</TableCell>
+                    </TableRow>
+                  )}
                   </TableBody>
                 </Table>
               </TableContainer>

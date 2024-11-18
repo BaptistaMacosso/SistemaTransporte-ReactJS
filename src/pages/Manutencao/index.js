@@ -44,9 +44,13 @@ const Manutencao = () => {
 
     const handleSearch = (e) => setFiltro(e.target.value);
 
-    const manutencaoFiltradas = manutencao.filter((manutencao) =>
+    /*const manutencaoFiltradas = manutencao.filter((manutencao) =>
       manutencao.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())
-    );
+    );*/
+
+    const manutencaoFiltradas = Array.isArray(manutencao) 
+    ? manutencao.filter((manutencao) => manutencao.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
+    : [];
 
     //...................................API........................
     useEffect(() => {
@@ -96,9 +100,15 @@ const Manutencao = () => {
         const response = await axios.get('sistema-transporte-backend.vercel.app/api/manutencao/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
-        setManutencao(response.data.allmanutencao);
-        console.log(response.data.allmanutencao);
+        // Garanta que 'users' seja um array antes de setá-lo no estado
+        if (Array.isArray(response.data.allmanutencao)) {
+          setManutencao(response.data.allmanutencao);
+          console.log(response.data.allmanutencao);
+        } else {
+          setManutencao([]); // Previna erros futuros
+        }
       }catch(error) {
+        setManutencao([]); // Previna erros futuros
         if (error.response.status === 500) {
           toast.error(error.response.data.message);
         }
@@ -155,7 +165,8 @@ const Manutencao = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {manutencaoFiltradas.map((manutencao) => {
+                      {manutencaoFiltradas?.length > 0 ? (
+                        manutencaoFiltradas.map((manutencao) => {
                           return (
                             <TableRow key={manutencao.id} >
                               <TableCell>{manutencao.id}</TableCell>
@@ -181,7 +192,12 @@ const Manutencao = () => {
                               </TableCell>
                             </TableRow>
                           );
-                        })}
+                        })
+                        ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center">Nenhuma manutenção encontrada.</TableCell>
+                        </TableRow>
+                      )}
                       </TableBody>
                     </Table>
                   </TableContainer>
