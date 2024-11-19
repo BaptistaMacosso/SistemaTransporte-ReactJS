@@ -89,7 +89,6 @@ const Motoristas = () => {
         // Garanta que 'motorista' seja um array antes de setá-lo no estado
         if (Array.isArray(response.data.motorista)) {
           setMotoristas(response.data.motorista);
-          console.log(response.data.motorista);
         } else {
           setMotoristas([]); // Previna erros futuros
         }
