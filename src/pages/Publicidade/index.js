@@ -64,9 +64,11 @@ const Publicidade = () => {
                 </Button>
             </Grid2>
             {/* Tabela de Publicidade */}
+            <Box marginBottom={3} />
             <Grid2 item xs={12}>
+            <Box marginBottom={2} />
               <Card>
-                <Typography variant="h6" sx={{ padding: 2 }}>Lista de Publicidade</Typography>
+                <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Lista de Publicidade</Typography>
                 <TableContainer component={Paper}>
                   <Table aria-label="tabela de publicidade">
                     <TableHead>

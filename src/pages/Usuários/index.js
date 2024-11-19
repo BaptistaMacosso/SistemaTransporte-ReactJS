@@ -88,7 +88,7 @@ const Usuarios = () => {
   const fetchUsers = async () => {
       try {
         setLoading(true); // Inicia o carregamento
-        const response = await axios.get('/api/auth/listar', {
+        const response = await axios.get('https://sistema-transporte-backend.vercel.app/api/auth/listar', {
           headers: {
             'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
           },
@@ -122,7 +122,7 @@ const Usuarios = () => {
           toast.warning("Preencha todos os campos");
           return;
         }else{
-            const response = await axios.put(`/api/auth/update/${novoUsuario.userId}`, 
+            const response = await axios.put(`https://sistema-transporte-backend.vercel.app/api/auth/update/${novoUsuario.userId}`, 
               novoUsuario,
               {
                 headers:{
@@ -144,7 +144,7 @@ const Usuarios = () => {
           toast.warning("Preencha todos os campos");
           return;
         }else{
-            const response = await axios.post('/api/auth/register', 
+            const response = await axios.post('https://sistema-transporte-backend.vercel.app/api/auth/register', 
               {
                 userNome: novoUsuario.userNome,
                 userEmail: novoUsuario.userEmail,
@@ -167,7 +167,7 @@ const Usuarios = () => {
   const handleDelete = async (user) => {
     if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
       try {
-        const response = await axios.delete(`/api/auth/delete/${user.userId}`);
+        const response = await axios.delete(`https://sistema-transporte-backend.vercel.app/api/auth/delete/${user.userId}`);
         if(response.status === 201) {
           toast.success(response.data.message);
         }

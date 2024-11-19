@@ -98,7 +98,7 @@ const PlanoManutencao = () => {
     const fetchPlanoManutencao = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/planomanutencao/listar',{
+        const response = await axios.get('https://sistema-transporte-backend.vercel.app/api/planomanutencao/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
         
@@ -138,7 +138,7 @@ const PlanoManutencao = () => {
       
       try {
         if (window.confirm('Tem certeza que deseja excluir este plano de manutenção?')) {
-          const response = await axios.delete(`/api/planomanutencao/delete/${plano.id}`,{
+          const response = await axios.delete(`https://sistema-transporte-backend.vercel.app/api/planomanutencao/delete/${plano.id}`,{
             headers:{ 'Authorization': `Bearer ${token}`, }
           });
           if(response.status === 201){
@@ -165,7 +165,7 @@ const PlanoManutencao = () => {
       } else {
         //Salvar
         try {
-          const response = await axios.post('/api/planomanutencao/registar',
+          const response = await axios.post('https://sistema-transporte-backend.vercel.app/api/planomanutencao/registar',
           novoPlanManutencao, 
           {
             headers:{ 
@@ -192,7 +192,7 @@ const PlanoManutencao = () => {
     //Listagem de viaturas
     const listagemViaturas = async () =>{
       try {
-        const response = await axios.get('/api/viatura/listar',{
+        const response = await axios.get('https://sistema-transporte-backend.vercel.app/api/viatura/listar',{
           headers:{ 'Authorization': `Bearer ${token}`, }
         });
 
