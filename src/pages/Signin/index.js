@@ -12,6 +12,7 @@ const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [novoUsuario, setNovoUsuario] = useState({userId: null, userNome: '', userEmail: '', userPassword: '', tipoUsuarioId: '' });
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -21,7 +22,7 @@ const Signin = () => {
         setError("Preencha todos os campos");
         return;
       }else{
-          const response = await axios.post('/api/auth/login', 
+          const response = await axios.post('https://sistema-transporte-backend.vercel.app/api/auth/login', 
             {
               userEmail: email,
               userPassword: password

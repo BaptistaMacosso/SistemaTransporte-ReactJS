@@ -96,7 +96,6 @@ const Usuarios = () => {
         // Garanta que 'users' seja um array antes de setá-lo no estado
         if (Array.isArray(response.data.allUsers)) {
           setUsers(response.data.allUsers);
-          console.log(response.data.allUsers);
         } else {
           setUsers([]); // Previna erros futuros
         }
