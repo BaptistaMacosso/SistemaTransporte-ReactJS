@@ -119,6 +119,7 @@ const CheckViatura = () => {
         const response = await listarChecklist(token);
         if (response.data.checklist) {
           setCheckViatura(response.data.checklist);
+          setLoading(false);
         } else {
           setCheckViatura([]); // Previna erros futuros
         }
@@ -134,7 +135,7 @@ const CheckViatura = () => {
       try {
         const response = await listarTipoManutencao(token);
 
-        if (Array.isArray(response.data.tipos)) {
+        if (response.data.tipos) {
           setTipoManutencao(response.data.tipos);
         } else {
           setTipoManutencao([]); // Previna erros futuros
