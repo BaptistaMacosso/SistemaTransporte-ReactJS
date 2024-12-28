@@ -36,11 +36,11 @@ const Signin = () => {
             'Content-Type': 'application/json',
           },
         });
-      if(response.status === 201) {
+        if(response.status === 201) {
           login(response.data.token);
           navigate('/Home');
-      }else if(response.status === 400 || response.status === 401 || response.status === 404){
-        toast.error(response.data.message);
+        }else if(response.status === 400 || response.status === 401 || response.status === 404){
+          toast.error(response.data.message);
       }
     } catch (err) {
       if(err.response.status === 500){

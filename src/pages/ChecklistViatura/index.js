@@ -2,12 +2,11 @@ import React, { useContext, useEffect, useState, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
-import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,
-         IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
-         FormControl,InputLabel,Select,MenuItem,CircularProgress
-} from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { listar, inserir, deletar } from '../../services/checklistService';
+import { TextField,Button,Grid2,CircularProgress } from '@mui/material';
+import ChecklistDialog from '../../components/Checklist/checklistDialog';
+import ChecklistDatagrid from '../../components/Checklist/checklistDatagrid';
+import { Add as AddIcon } from '@mui/icons-material';
+import { listarChecklist, inserirChecklist, deletarChecklist } from '../../services/checklistService';
 import {listarTipoManutencao} from '../../services/tipoManutencaoService';
 import { listarViatura } from '../../services/viaturasService';
 import { AuthContext } from '../../contexts/auth';
@@ -41,7 +40,7 @@ const CheckViatura = () => {
   
   const handleSearch = (e) => setFiltro(e.target.value);
 
-  const checkViaturaFiltradas = Array.isArray(checkViatura) 
+  const checklistViaturaFiltradas = Array.isArray(checkViatura) 
     ? checkViatura.filter((viaturaCheck) => viaturaCheck.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
     : [];
 
@@ -73,7 +72,7 @@ const CheckViatura = () => {
     const handleDelete = async (checkViatura) => {   
       try {
         if (window.confirm('Tem certeza que deseja excluir este verificação?')) {
-          const response = await deletar(checkViatura.id, token);
+          const response = await deletarChecklist(checkViatura.id, token);
           if(response.status === 201){
             toast.success(response.data.message);
             listagemCheckListViaturas();
@@ -97,7 +96,7 @@ const CheckViatura = () => {
       } else {
         //Salvar
         try {
-          const response = await inserir(novoCheckViatura, token);
+          const response = await inserirChecklist(novoCheckViatura, token);
           if(response.status === 201){
             toast.success("Verificação criado com sucesso!");
             listagemCheckListViaturas();
@@ -117,7 +116,7 @@ const CheckViatura = () => {
     const listagemCheckListViaturas = async () =>{
       setLoading(true);
       try {
-        const response = await listar(token);
+        const response = await listarChecklist(token);
         if (response.data.checklist) {
           setCheckViatura(response.data.checklist);
         } else {
@@ -182,8 +181,7 @@ const CheckViatura = () => {
       }
     }, [isAuthenticated, Logout, listagemDados]);
 
-    //................................................................
-    
+  //................................................................
    return (
     <>
       <NavBar />
@@ -208,137 +206,22 @@ const CheckViatura = () => {
           <Box marginBottom={3} />
           {/* Tabela de Viaturas */}
           {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
-          <Grid2 item xs={12}>
-          <Box marginBottom={2} />
-            <Card>
-              <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Checklist de Verificação</Typography>
-              <TableContainer component={Paper}>
-                <Table aria-label="Checklist de Verificação">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Data</TableCell>
-                      <TableCell>Matrícula</TableCell>
-                      <TableCell>Tipo de Manutenção</TableCell>
-                      <TableCell>Quilometragem</TableCell>
-                      <TableCell>Itens Verificados</TableCell>
-                      <TableCell>Observação</TableCell>
-                      <TableCell>Técnico Responsável</TableCell>
-                      <TableCell align="center">Ação</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                  {checkViaturaFiltradas?.length > 0 ? (checkViaturaFiltradas.map((checklist) => {
-                    const apenasData = new Date(checklist.dataCheckList).toISOString().split("T")[0];
-                      return (
-                        <TableRow key={checklist.id}>
-                          <TableCell>{apenasData}</TableCell>
-                          <TableCell>{checklist.viatura.viaturaMatricula}</TableCell>
-                          <TableCell>{checklist.tipoManutencao.tipoManutencao}</TableCell>
-                          <TableCell>{checklist.quilometragem} KM</TableCell>
-                          <TableCell>{checklist.itemsVerificados}</TableCell>
-                          <TableCell>{checklist.observacao}</TableCell>
-                          <TableCell>{checklist.tecnicoResponsavel}</TableCell>
-                          <TableCell align="center">
-                            <Tooltip title="Excluir" onClick={() =>handleDelete(checklist)}>
-                              <IconButton color="secondary">
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                    ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center">Nenhuma verificação encontrado.</TableCell>
-                    </TableRow>
-                  )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Card>
-          </Grid2>
+            <ChecklistDatagrid
+              checkViaturaFiltradas={checklistViaturaFiltradas}
+              handleDelete={handleDelete}
+            />
           )} {/*Fim do loading*/ }
-        {/**/}
         {/* Modal de Adicionar Nova Viatura */}
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{isEdit===true ? 'Editar Verificação' : 'Nova Verificação' }</DialogTitle>
-          <DialogContent>
-            <FormControl fullWidth sx={{ marginBottom: 2, marginTop: 1 }}>
-              <InputLabel id="role-select-label">Tipo</InputLabel>
-              <Select
-                labelId="role-select-label"
-                name="tipoManutencaoId"
-                value={novoCheckViatura.tipoManutencaoId}
-                label="Tipo de manutenção"
-                onChange={handleChange}
-              >
-                {tipoManutencao.map((tipo) => (
-                  <MenuItem value={tipo.id}>
-                    {tipo.tipoManutencao}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth sx={{ marginBottom: 2, marginTop: 1 }}>
-              <InputLabel id="role-select-label">Viatura</InputLabel>
-              <Select
-                labelId="role-select-label"
-                name="viaturaId"
-                value={novoCheckViatura.viaturaId}
-                label="Viatura"
-                onChange={handleChange}
-              >
-                {viaturas.map((viatura) => (
-                  <MenuItem value={viatura.viaturaId}>
-                    {viatura.viaturaMarca+" - "+viatura.viaturaMatricula}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Quilometragem"
-              name="quilometragem"
-              type="number"
-              fullWidth
-              value={novoCheckViatura.quilometragem}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              label="Itens Verificados"
-              name="itemsVerificados"
-              type="text"
-              fullWidth
-              value={novoCheckViatura.itemsVerificados}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              label="Observação"
-              name="observacao"
-              type="text"
-              fullWidth
-              value={novoCheckViatura.observacao}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="dense"
-              label="Técnico Responsável"
-              name="tecnicoResponsavel"
-              type="text"
-              fullWidth
-              value={novoCheckViatura.tecnicoResponsavel}
-              onChange={handleChange}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="secondary">Cancelar</Button>
-            <Button onClick={handleSave} color="primary">{isEdit===true ? 'Salvar Alterações' : 'Adicionar' }</Button>
-          </DialogActions>
-        </Dialog>
+        <ChecklistDialog
+          open={open}
+          handleClose={handleClose}
+          handleSave={handleSave}
+          isEdit={isEdit}
+          novoCheckViatura={novoCheckViatura}
+          tipoManutencao={tipoManutencao}
+          viaturas={viaturas}
+          handleChange={handleChange}
+        />
         </Box>
       </Box>
     </>

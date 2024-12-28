@@ -5,10 +5,11 @@ import api from '../api/apiConfig';
  * @param {string} token - Token de autenticação
  * @returns {Promise<Array>} - Lista de checklists
  */
-export const listar = async (token) => {
+export const listarChecklist = async (token) => {
   const response = await api.get('/checklist/listar', {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log("Dados encontrados: "+response.data.checklist);
   return Array.isArray(response.data?.checklist) ? response.data.checklist : [];
 };
 
@@ -18,7 +19,7 @@ export const listar = async (token) => {
  * @param {string} token - Token de autenticação
  * @returns {Promise<Object>} - Dados do checklist
  */
-export const buscarPorId = async (id, token) => {
+export const buscarChecklistPorId = async (id, token) => {
   const response = await api.get(`/checklist/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -31,7 +32,7 @@ export const buscarPorId = async (id, token) => {
  * @param {string} token - Token de autenticação
  * @returns {Promise<Object>} - Dados do checklist criado
  */
-export const inserir = async (checklist, token) => {
+export const inserirChecklist = async (checklist, token) => {
   const response = await api.post('/checklist/novo', checklist, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -45,7 +46,7 @@ export const inserir = async (checklist, token) => {
  * @param {string} token - Token de autenticação
  * @returns {Promise<Object>} - Dados do checklist atualizado
  */
-export const editar = async (id, checklist, token) => {
+export const editarChecklist = async (id, checklist, token) => {
   const response = await api.put(`/checklist/editar/${id}`, checklist, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -58,7 +59,7 @@ export const editar = async (id, checklist, token) => {
  * @param {string} token - Token de autenticação
  * @returns {Promise<void>} - Confirmação da exclusão
  */
-export const deletar = async (id, token) => {
+export const deletarChecklist = async (id, token) => {
   const response = await api.delete(`/checklist/deletar/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
