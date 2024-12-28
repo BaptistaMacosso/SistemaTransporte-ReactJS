@@ -9,7 +9,7 @@ export const listarChecklist = async (token) => {
   const response = await api.get('/checklist/listar', {
     headers: { Authorization: `Bearer ${token}` },
   });
-  console.log("Dados encontrados: "+response.data.checklist);
+  console.log("Dados encontrados: "+response.checklist);
   return Array.isArray(response.data?.checklist) ? response.data.checklist : [];
 };
 
