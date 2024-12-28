@@ -2,26 +2,38 @@ import React, { useState, useContext, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
-import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,IconButton,
-         Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
-         CircularProgress
-} from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Check, AirlineStops } from '@mui/icons-material';
+import { TextField,Button,Grid2,CircularProgress } from '@mui/material';
+import { Add as AddIcon, Check } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../contexts/auth';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { listarViatura, inserirViatura, editarViatura, deletarViatura } from '../../services/viaturasService';
+import {listarViaturaCategoria} from '../../services/viaturaCategoriaService';
+import {listarViaturaTipo} from '../../services/viaturaTipoService';
+import ViaturaDialog from '../../components/Viatura/viaturaDialog';
+import ViaturaDatagrid from '../../components/Viatura/viaturaDataGrid';
+
 
 const Viaturas = () => {
-  //
   // Recupera o token do contexto de autenticação ou localStorage
   const { token } = useContext(AuthContext) || { token: localStorage.getItem('token') };
   const { isAuthenticated, logout  } = useContext(AuthContext);
   const { navigate } = useNavigate();
   const [open, setOpen] = useState(false);
-  const [novaViatura, setNovaViatura] = useState({ viaturaId: null, viaturaMarca: '', viaturaModelo: '', viaturaMatricula: '',
-                                                   viaturaAnoFabrica: '', viaturaCombustivel: '', viaturaCor: '',
-                                                   viaturaNumeroChassi: '', viaturaNumeroLugar: '', viaturaNumeroMotor: '', quilometragem: ''});
+  const [viaturaCategoria, setViaturaCategoria] = useState([]);
+  const [tipoViatura, setViaturaTipo] = useState([]);
+  const [novaViatura, setNovaViatura] = useState({ 
+    viaturaId: null, 
+    viaturaTipoId: '',
+    viaturaCategoriaId: '',
+    viaturaMarca: '',
+    viaturaModelo: '',
+    viaturaMatricula: '',
+    viaturaAnoFabrica: '',
+    viaturaCombustivel: '',
+    viaturaCor: '',
+    quilometragem: ''
+  });
   const [filtro, setFiltro] = useState('');
   const [viaturas, setViaturas] = useState([]);
   const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
@@ -38,30 +50,28 @@ const Viaturas = () => {
       setIsEdit(false);
       setNovaViatura({
         viaturaId: null, 
+        viaturaTipoId: viatura.viaturaTipoId || '', 
+        viaturaCategoriaId: viatura.viaturaCategoriaId || '', 
         viaturaMarca: viatura.viaturaMarca || '', 
         viaturaModelo: viatura.viaturaModelo || '', 
         viaturaMatricula: viatura.viaturaMatricula || '',
         viaturaAnoFabrica: viatura.viaturaAnoFabrica || '', 
         viaturaCombustivel: viatura.viaturaCombustivel || '', 
         viaturaCor: viatura.viaturaCor || '',
-        viaturaNumeroChassi: viatura.viaturaNumeroChassi || '', 
-        viaturaNumeroLugar: viatura.viaturaNumeroLugar || '', 
-        viaturaNumeroMotor: viatura.viaturaNumeroMotor || '', 
         quilometragem: viatura.quilometragem || ''
       });
     } else {
       setIsEdit(true);
       setNovaViatura({
         viaturaId: viatura.viaturaId, 
+        viaturaTipoId: viatura.viaturaTipoId, 
+        viaturaCategoriaId: viatura.viaturaCategoriaId, 
         viaturaMarca: viatura.viaturaMarca, 
         viaturaModelo: viatura.viaturaModelo, 
         viaturaMatricula: viatura.viaturaMatricula,
         viaturaAnoFabrica: viatura.viaturaAnoFabrica, 
         viaturaCombustivel: viatura.viaturaCombustivel, 
         viaturaCor: viatura.viaturaCor,
-        viaturaNumeroChassi: viatura.viaturaNumeroChassi, 
-        viaturaNumeroLugar: viatura.viaturaNumeroLugar, 
-        viaturaNumeroMotor: viatura.viaturaNumeroMotor, 
         quilometragem: viatura.quilometragem
       });
     }
@@ -73,17 +83,20 @@ const Viaturas = () => {
     setOpen(false);
     setIsEdit(false);
     setNovaViatura({ 
-      viaturaId: null, viaturaMarca: '', viaturaModelo: '', viaturaMatricula: '',
-      viaturaAnoFabrica: '', viaturaCombustivel: '', viaturaCor: '',
-      viaturaNumeroChassi: '', viaturaNumeroLugar: '', viaturaNumeroMotor: '', quilometragem: '' 
+      viaturaId: null, 
+      viaturaTipoId: '',
+      viaturaCategoriaId: '',
+      viaturaMarca: '',
+      viaturaModelo: '',
+      viaturaMatricula: '',
+      viaturaAnoFabrica: '',
+      viaturaCombustivel: '',
+      viaturaCor: '',
+      quilometragem: ''
     });
   };
 
   const handleSearch = (e) => setFiltro(e.target.value);
-
- /*const viaturasFiltradas = viaturas.filter((carro) =>
-    carro.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())
-  );*/
 
   const viaturasFiltradas = Array.isArray(viaturas) 
     ? viaturas.filter((carro) => carro.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
@@ -103,30 +116,18 @@ const Viaturas = () => {
   };
 
   //.....................................API...............................
-  useEffect(()=>{
-    if(!isAuthenticated){
-      logout();
-      navigate('/login');
-    }
-    else{
-      fetchViaturas();
-    }
-  },[isAuthenticated, logout]);
   //Listar Viaturas
   const fetchViaturas = async() =>{
     try{
       setLoading(true);
-      const response = await axios.get('https://sistema-transporte-backend.vercel.app/api/viatura/listar',{
-        headers:{
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-      // Garanta que 'users' seja um array antes de setá-lo no estado
-      if (Array.isArray(response.data.viatura)) {
-        setViaturas(response.data.viatura);
-        console.log(response.data.viatura);
-      } else {
-        setViaturas([]); // Previna erros futuros
+      const response = await listarViatura(token);
+      console.log(response.data);
+      if(response.status === 200){
+        setViaturas(response.data.viaturas);
+        setLoading(false);
+      }else{
+        setViaturas([]);
+        setLoading(false);
       }
     }catch(error){
         toast.error('erro: Não foi possível carregar a lista de viaturas. Detalhes: '+error);
@@ -139,35 +140,22 @@ const Viaturas = () => {
   //Salvar Viatura
   const CriarViatura = async() =>{
     try{
-      const response = await axios.post('https://sistema-transporte-backend.vercel.app/api/viatura/registar',novaViatura,{
-        headers:{
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
-      if(response.status === 201){
-        toast.success(response.data.message);
+      const data = await inserirViatura(novaViatura, token);
+      if(data.status === 201){
+        toast.success(data.data.message);
+        fetchViaturas();
       }
-      else if(response.status === 400){
-        toast.success(response.data.message);
+      else if(data.status === 400){
+        toast.success(data.data.message);
       }
     }catch(error){
       if(error.status === 400){
-        toast.success(error.response.data.message+"!");
+        toast.error(error.response.data.message+"!");
       }else if(error.status === 500){
         toast.error(error.response.data.message);
       }
     }
     fetchViaturas();
-  };
-
-  //Realizar Checklist Viatura
-  const checklistViaturas = async() =>{
-    try{
-      
-    }catch(error){
-        toast.error('erro: Não foi possível salvar o checklist da viatura. Detalhes: '+error);
-    }
   };
 
   //Editar Viaturas
@@ -177,15 +165,10 @@ const Viaturas = () => {
       return;
     } else {
       try{
-        const response = await axios.put(`https://sistema-transporte-backend.vercel.app/api/viatura/update/${novaViatura.viaturaId}`,
-          novaViatura,{
-          headers:{
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
-        });
+        const response = await editarViatura(novaViatura.viaturaId, novaViatura, token);
         if(response.status === 201){
           toast.success(response.data.message);
+          fetchViaturas();
         }
       }catch(error){
         if(error.status === 404){
@@ -202,13 +185,10 @@ const Viaturas = () => {
   const excluirViatura = async(viatura) =>{
     if(window.confirm('Tem certeza que deseja excluir esta viatura?')){
       try{
-        const response = await axios.delete(`https://sistema-transporte-backend.vercel.app/api/viatura/delete/${viatura.viaturaId}`,{
-          headers:{
-            'Authorization': `Bearer ${token}`,
-          }
-        });
+        const response = await deletarViatura(viatura.viaturaId, token);
         if(response.status === 200){
           toast.success(response.data.message);
+          fetchViaturas();
         }
       }catch(error){
           if (error.status === 404) {
@@ -220,6 +200,61 @@ const Viaturas = () => {
       fetchViaturas();
     }
   };
+
+  //Obter Categoria da Viatura
+  const listarCategoriaViatura = async() =>{
+    try{
+      const response = await listarViaturaCategoria(token);
+      if (response.data.viaturaCategoria) {
+        setViaturaCategoria(response.data.viaturaCategoria);
+        console.log("Obter: "+response.data);
+      } else {
+        setViaturaCategoria([]); // Previna erros futuros
+      }
+    }catch(error){
+        toast.error('erro: Não foi possível listar a categoria da viatura. Detalhes: '+error);
+    }
+  };
+
+  //Obter Tipo de Viatura
+  const listarTipoViatura = async() =>{
+    try{
+      const response = await listarViaturaTipo(token);
+      if (response.data.viaturatipo) {
+        setViaturaTipo(response.data.viaturatipo);
+        console.log("Obter Tipo: "+response.data);
+      } else {
+        setViaturaTipo([]); // Previna erros futuros
+      }
+    }catch(error){
+        toast.error('erro: Não foi possível listar o tipo da viatura. Detalhes: '+error);
+        setViaturaTipo([]);
+    }
+  };
+
+  //Realizar Checklist Viatura
+  const checklistViaturas = async() =>{
+    try{
+      
+    }catch(error){
+        toast.error('erro: Não foi possível salvar o checklist da viatura. Detalhes: '+error);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!isAuthenticated) {
+        logout();
+        navigate('/login');
+      } else {
+        await fetchViaturas();
+        await listarCategoriaViatura();
+        await listarTipoViatura();
+      }
+    };
+  
+    loadData();
+  }, [isAuthenticated]);
   
   //.......................................................................
 
@@ -251,191 +286,25 @@ const Viaturas = () => {
           </Grid2>
 
           {/* Modal de Adicionar Nova Viatura */}
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>{isEdit===true ? 'Editar Viatura' : 'Adicionar Viatura' }</DialogTitle>
-            <DialogContent>
-            <Box sx={{ maxWidth: 800, margin: "auto", padding: 3 }}>
-            <Grid2 container spacing={4}>
-              <Grid2 item xs={12} sm={6}>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  label="Marca"
-                  name="viaturaMarca"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaMarca}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Modelo"
-                  name="viaturaModelo"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaModelo}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Matrícula"
-                  name="viaturaMatricula"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaMatricula}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Ano de Fabrico"
-                  name="viaturaAnoFabrica"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaAnoFabrica}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Combustível"
-                  name="viaturaCombustivel"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaCombustivel}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Viatura Cor"
-                  name="viaturaCor"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaCor}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Número Chassi"
-                  name="viaturaNumeroChassi"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaNumeroChassi}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Número de Lugares"
-                  name="viaturaNumeroLugar"
-                  type="number"
-                  fullWidth
-                  value={novaViatura.viaturaNumeroLugar}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Número do Motor"
-                  name="viaturaNumeroMotor"
-                  type="text"
-                  fullWidth
-                  value={novaViatura.viaturaNumeroMotor}
-                  onChange={handleChange}
-                />
-                </Grid2>
-                <Grid2 item xs={12} sm={6}>
-                <TextField
-                  margin="dense"
-                  label="Quilometragem"
-                  name="quilometragem"
-                  type="number"
-                  fullWidth
-                  value={novaViatura.quilometragem}
-                  onChange={handleChange}
-                />
-                </Grid2>
-            </Grid2>
-            </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose} color="secondary">Cancelar</Button>
-              <Button onClick={handleSave} color="primary">{isEdit===true ? 'Salvar Alterações' : 'Adicionar' }</Button>
-            </DialogActions>
-          </Dialog>
+          <ViaturaDialog
+            open={open}
+            handleClose={handleClose}
+            handleSave={handleSave}
+            isEdit={isEdit}
+            novaViatura={novaViatura}
+            handleChange={handleChange}
+            tipoViatura={tipoViatura}
+            viaturaCategoria={viaturaCategoria}
+          />
+
           <Box marginBottom={3} />
           {/* Tabela de Viaturas */}
           {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
-          <Grid2 item xs={12}>
-          <Box marginBottom={2}/>
-            <Card>
-              <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Listagem de viaturas</Typography>
-              <TableContainer component={Paper}>
-                <Table aria-label="tabela de viaturas">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Código</TableCell>
-                      <TableCell>Marca</TableCell>
-                      <TableCell>Matrícula</TableCell>
-                      <TableCell>Modelo</TableCell>
-                      <TableCell>Kilometragem</TableCell>
-                      <TableCell>Combustível</TableCell>
-                      <TableCell align="center">Ações</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                  {viaturasFiltradas?.length > 0 ? (
-                    viaturasFiltradas.map((viatura) => {
-                      return (
-                        <TableRow key={viatura.viaturaId}>
-                          <TableCell>{viatura.viaturaId}</TableCell>
-                          <TableCell>{viatura.viaturaMarca}</TableCell>
-                          <TableCell>{viatura.viaturaMatricula}</TableCell>
-                          <TableCell>{viatura.viaturaModelo}</TableCell>
-                          <TableCell>{viatura.quilometragem} km</TableCell>
-                          <TableCell>{viatura.viaturaCombustivel}</TableCell>
-                          <TableCell align="center">
-                            <Tooltip title="Editar">
-                              <IconButton color="primary" onClick={() => handleOpen(viatura)}>
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Atribuir Viatura">
-                              <IconButton color="sucess" onClick={() => handleOpen(viatura)}>
-                                <AirlineStops />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Excluir">
-                              <IconButton color="secondary" onClick={() => excluirViatura(viatura)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center">Nenhuma viatura encontrada.</TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Card>
-          </Grid2>
+            <ViaturaDatagrid
+              viaturasFiltradas={viaturasFiltradas}
+              handleOpen={handleOpen}
+              excluirViatura={excluirViatura}
+            />
           )} {/*Fim do loading*/ }
         </Box>
       </Box>

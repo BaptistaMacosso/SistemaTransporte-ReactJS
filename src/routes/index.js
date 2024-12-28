@@ -5,7 +5,7 @@ import Home from '../pages/Home';
 import Signin from '../pages/Signin';
 import Signup from '../pages/Signup';
 import Motoristas from '../pages/Motoristas';
-import PlanoManutencao from '../pages/PlanoManutencao';
+import ChecklistViatura from '../pages/ChecklistViatura';
 import Publicidade from '../pages/Publicidade';
 import Usuarios from '../pages/Usuários';
 import Viaturas from '../pages/Viaturas';
@@ -26,7 +26,7 @@ const RoutesApp = () => {
             <Routes>
                 <Route exact path='/Home' element={<Private Item={Home} />} />
                 <Route exact path='/Motoristas' element={<Private Item={Motoristas} />} />
-                <Route exact path='/PlanoManutencao' element={<Private Item={PlanoManutencao} />} />
+                <Route exact path='/CheckViatura' element={<Private Item={ChecklistViatura} />} />
                 <Route exact path='/Publicidade' element={<Private Item={Publicidade} />} />
                 <Route exact path='/Usuarios' element={<Private Item={Usuarios} />} />
                 <Route exact path='/Viaturas' element={<Private Item={Viaturas} />} />

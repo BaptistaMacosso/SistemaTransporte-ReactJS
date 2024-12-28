@@ -11,9 +11,11 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { CarCrash, Handyman, Home, LocalShipping, Logout, PeopleAlt, Settings } from '@mui/icons-material';
 import AirlineSeatReclineExtraIcon from '@mui/icons-material/AirlineSeatReclineExtra';
-import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth';
 import { useAppStore } from '../../appStore';
@@ -145,7 +147,7 @@ export default function Dashboard() {
                 />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/PlanoManutencao')}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/CheckViatura')}>
               <ListItemButton
                 sx={[
                   {
@@ -179,7 +181,7 @@ export default function Dashboard() {
                  <CarCrash />
                 </ListItemIcon>
                 <ListItemText
-                  primary= "Plano de Manutenção"
+                  primary= "Viatura Verificação"
                   sx={[
                     open
                       ? {
@@ -333,7 +335,7 @@ export default function Dashboard() {
                 />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/Publicidade')}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/LicencaPublicidade')}>
               <ListItemButton
                 sx={[
                   {
@@ -364,10 +366,104 @@ export default function Dashboard() {
                         },
                   ]}
                 >
-                 <IntegrationInstructionsIcon />
+                 <ReceiptLongIcon />
                 </ListItemIcon>
                 <ListItemText
-                  primary= "Publicidade"
+                  primary= "Licença Publicidade"
+                  sx={[
+                    open
+                      ? {
+                          opacity: 1,
+                        }
+                      : {
+                          opacity: 0,
+                        },
+                  ]}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/LicencaTransporte')}>
+              <ListItemButton
+                sx={[
+                  {
+                    minHeight: 48,
+                    px: 2.5,
+                  },
+                  open
+                    ? {
+                        justifyContent: 'initial',
+                      }
+                    : {
+                        justifyContent: 'center',
+                      },
+                ]}
+              >
+                <ListItemIcon
+                  sx={[
+                    {
+                      minWidth: 0,
+                      justifyContent: 'center',
+                    },
+                    open
+                      ? {
+                          mr: 3,
+                        }
+                      : {
+                          mr: 'auto',
+                        },
+                  ]}
+                >
+                 <DocumentScannerIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary= "Licença Transporte"
+                  sx={[
+                    open
+                      ? {
+                          opacity: 1,
+                        }
+                      : {
+                          opacity: 0,
+                        },
+                  ]}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/Oficina')}>
+              <ListItemButton
+                sx={[
+                  {
+                    minHeight: 48,
+                    px: 2.5,
+                  },
+                  open
+                    ? {
+                        justifyContent: 'initial',
+                      }
+                    : {
+                        justifyContent: 'center',
+                      },
+                ]}
+              >
+                <ListItemIcon
+                  sx={[
+                    {
+                      minWidth: 0,
+                      justifyContent: 'center',
+                    },
+                    open
+                      ? {
+                          mr: 3,
+                        }
+                      : {
+                          mr: 'auto',
+                        },
+                  ]}
+                >
+                 <HomeRepairServiceIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary= "Oficina"
                   sx={[
                     open
                       ? {

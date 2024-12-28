@@ -40,6 +40,12 @@ export const LabelError = styled.label`
     color: red;
 `;
 
+export const H7 = styled.label`
+    font-size: 9px;
+    text-transform: uppercase;
+    color: #676767;
+`;
+
 export const Strong = styled.label`
     cursor: pointer;
     a{
