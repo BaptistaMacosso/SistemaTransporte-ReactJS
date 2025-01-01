@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, TextField, Button, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../../contexts/auth';
+import { AuthContext, useAuth } from '../../contexts/auth';
 import axios from 'axios';
 import { H7 } from './styles';
 
 const Signin = () => {
+  // Recupera o token do contexto de autenticação ou localStorage
+  const token = localStorage.getItem('token');
+  const { isTokenExpired } = useContext(AuthContext);
   const navigate = useNavigate();
   const [novoUsuario, setNovoUsuario] = useState({
     userId: null,
@@ -18,6 +21,13 @@ const Signin = () => {
   });
   const { login } = useAuth();
 
+  // Verificação do token na montagem do componente
+  useEffect(() => {
+    if (token && !isTokenExpired(token)) {
+      navigate("/Home"); // Redireciona para a página Home se o token for válido
+    }
+  }, [token, isTokenExpired, navigate]);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNovoUsuario({ ...novoUsuario, [name]: value });

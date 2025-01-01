@@ -6,10 +6,12 @@ import Signin from '../pages/Signin';
 import Signup from '../pages/Signup';
 import Motoristas from '../pages/Motoristas';
 import ChecklistViatura from '../pages/ChecklistViatura';
-import Publicidade from '../pages/Publicidade';
+import Oficinas from '../pages/Oficinas';
 import Usuarios from '../pages/Usuários';
 import Viaturas from '../pages/Viaturas';
 import Manutencao from '../pages/Manutencao';
+import LicencaPublicidade from '../pages/LicencaPublicidade';
+import LicencaTransporte from '../pages/LicencaTransporte';
 
 //Elemento que irá verificar se o usuário 
 //está logado ou não antes de acessar a pagina home.
@@ -27,7 +29,9 @@ const RoutesApp = () => {
                 <Route exact path='/Home' element={<Private Item={Home} />} />
                 <Route exact path='/Motoristas' element={<Private Item={Motoristas} />} />
                 <Route exact path='/CheckViatura' element={<Private Item={ChecklistViatura} />} />
-                <Route exact path='/Publicidade' element={<Private Item={Publicidade} />} />
+                <Route exact path='/LicencaPublicidade' element={<Private Item={LicencaPublicidade} />} />
+                <Route exact path='/LicencaTransporte' element={<Private Item={LicencaTransporte} />} />
+                <Route exact path='/Oficinas' element={<Private Item={Oficinas} />} />
                 <Route exact path='/Usuarios' element={<Private Item={Usuarios} />} />
                 <Route exact path='/Viaturas' element={<Private Item={Viaturas} />} />
                 <Route exact path='/Manutencao' element={<Private Item={Manutencao} />} />

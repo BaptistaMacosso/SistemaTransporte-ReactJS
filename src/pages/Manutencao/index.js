@@ -4,7 +4,8 @@ import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,
   IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
-  CircularProgress
+  CircularProgress,
+  TablePagination
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { AuthContext } from '../../contexts/auth';
@@ -31,6 +32,8 @@ const Manutencao = () => {
     const [open, setOpen] = useState(false);
     const [filtro, setFiltro] = useState('');
     const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5); // Número de linhas por página
 
     const hoje = new Date();
 
@@ -51,6 +54,21 @@ const Manutencao = () => {
     const manutencaoFiltradas = Array.isArray(manutencao) 
     ? manutencao.filter((manutencao) => manutencao.viatura.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
     : [];
+
+    // Dados paginados
+    const displayedLicencas = manutencaoFiltradas.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0); // Resetar para a primeira página
+    };
 
     //...................................API........................
     useEffect(() => {
@@ -201,6 +219,16 @@ const Manutencao = () => {
                       </TableBody>
                     </Table>
                   </TableContainer>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={manutencaoFiltradas.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Linhas por página"
+                />
                 </Card>
               </Grid2>
             )} {/*Fim do loading*/ }

@@ -1,15 +1,23 @@
-import api from '../api/apiConfig';
+import API_BASE_URL from '../api/apiConfig';
+import axios from 'axios';
 
 /**
  * Lista todos os motoristas cadastrados no sistema.
  * @param {string} token - Token de autenticação do usuário.
  * @returns {Promise<Array>} - Retorna uma lista de motoristas ou um array vazio caso nenhum seja encontrado.
  */
-export const listar = async (token) => {
-  const response = await api.get('/motorista/listar', {
-    headers: { Authorization: `Bearer ${token}` },
+export const listarMotoristas = async (token) => {
+  const response = await axios.get(`${API_BASE_URL}/motoristas/listar`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json' 
+    },
   });
-  return Array.isArray(response.data?.motoristas) ? response.data.motoristas : [];
+  if(response.data && Array.isArray(response.data.motoristas)){
+    return response.data.motoristas;
+  }else{
+    return [];
+  }
 };
 
 /**
@@ -18,11 +26,18 @@ export const listar = async (token) => {
  * @param {string} token - Token de autenticação.
  * @returns {Promise<Object>} - Dados do motorista correspondente ao ID.
  */
-export const buscarPorId = async (id, token) => {
-  const response = await api.get(`/motorista/listarPorId/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+export const buscarMotoristaPorId = async (id, token) => {
+  const response = await axios.get(`${API_BASE_URL}/motoristas/listarPorId/${id}`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json' 
+    },
   });
-  return response.data;
+  if(response.data && Array.isArray(response.data.motorista)){
+    return response.data.motorista;
+  }else{
+    return [];
+  }
 };
 
 /**
@@ -31,9 +46,12 @@ export const buscarPorId = async (id, token) => {
  * @param {string} token - Token de autenticação.
  * @returns {Promise<Object>} - Dados do motorista recém-criado.
  */
-export const inserir = async (motorista, token) => {
-  const response = await api.post('/motorista/novo', motorista, {
-    headers: { Authorization: `Bearer ${token}` },
+export const inserirMotorista = async (motorista, token) => {
+  const response = await axios.post(`${API_BASE_URL}/motoristas/novo`, motorista, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json' 
+    },
   });
   return response.data;
 };
@@ -45,9 +63,12 @@ export const inserir = async (motorista, token) => {
  * @param {string} token - Token de autenticação.
  * @returns {Promise<Object>} - Dados do motorista atualizado.
  */
-export const editar = async (id, motorista, token) => {
-  const response = await api.put(`/motorista/update/${id}`, motorista, {
-    headers: { Authorization: `Bearer ${token}` },
+export const editarMotorista = async (id, motorista, token) => {
+  const response = await axios.put(`${API_BASE_URL}/motoristas/update/${id}`, motorista, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json' 
+    },
   });
   return response.data;
 };
@@ -58,9 +79,12 @@ export const editar = async (id, motorista, token) => {
  * @param {string} token - Token de autenticação.
  * @returns {Promise<void>} - Confirmação de exclusão (não retorna dados).
  */
-export const deletar = async (id, token) => {
-  const response = await api.delete(`/motorista/delete/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+export const deletarMotorista = async (id, token) => {
+  const response = await axios.delete(`${API_BASE_URL}/motoristas/delete/${id}`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json' 
+    },
   });
   return response.data;
 };

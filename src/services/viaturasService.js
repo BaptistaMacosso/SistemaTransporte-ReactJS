@@ -1,4 +1,5 @@
-import api from '../api/apiConfig';
+import API_BASE_URL from '../api/apiConfig';
+import axios from 'axios';
 
 /**
  * Lista todas as viaturas
@@ -6,10 +7,17 @@ import api from '../api/apiConfig';
  * @returns {Promise<Array>} - Lista de viaturas
  */
 export const listarViatura = async (token) => {
-  const response = await api.get('/viaturas/listar', {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.get(`${API_BASE_URL}/viaturas/listar`, {
+    headers: { 
+      Authorization: `Bearer ${token}`, 
+      'Content-Type': 'application/json' 
+    },
   });
-  return Array.isArray(response.data?.viaturas) ? response.data.viaturas : [];
+  if(response.data && Array.isArray(response.data.viaturas)){
+    return response.data.viaturas;
+  }else{
+    return [];
+  }
 };
 
 /**
@@ -19,8 +27,8 @@ export const listarViatura = async (token) => {
  * @returns {Promise<Object>} - Dados da viatura
  */
 export const buscarViaturaPorId = async (id, token) => {
-  const response = await api.get(`/viaturas/listarPorId/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.get(`${API_BASE_URL}/viaturas/listarPorId/${id}`, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
   return response.data;
 };
@@ -32,8 +40,8 @@ export const buscarViaturaPorId = async (id, token) => {
  * @returns {Promise<Object>} - Dados da viatura criada
  */
 export const inserirViatura = async (viatura, token) => {
-  const response = await api.post('/viaturas/novo', viatura, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.post(`${API_BASE_URL}/viaturas/novo`, viatura, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
   return response.data;
 };
@@ -46,8 +54,8 @@ export const inserirViatura = async (viatura, token) => {
  * @returns {Promise<Object>} - Dados da viatura atualizada
  */
 export const editarViatura = async (id, viatura, token) => {
-  const response = await api.put(`/viaturas/update/${id}`, viatura, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.put(`${API_BASE_URL}/viaturas/update/${id}`, viatura, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
   return response.data;
 };
@@ -59,8 +67,8 @@ export const editarViatura = async (id, viatura, token) => {
  * @returns {Promise<void>} - Confirmação da exclusão
  */
 export const deletarViatura = async (id, token) => {
-    const response = await api.delete(`/viaturas/delete/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.delete(`${API_BASE_URL}/viaturas/delete/${id}`, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
   return response.data;
 };

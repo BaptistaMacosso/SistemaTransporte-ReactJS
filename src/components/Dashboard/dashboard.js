@@ -429,7 +429,7 @@ export default function Dashboard() {
                 />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/Oficina')}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/Oficinas')}>
               <ListItemButton
                 sx={[
                   {
@@ -463,7 +463,7 @@ export default function Dashboard() {
                  <HomeRepairServiceIcon />
                 </ListItemIcon>
                 <ListItemText
-                  primary= "Oficina"
+                  primary= "Oficinas"
                   sx={[
                     open
                       ? {

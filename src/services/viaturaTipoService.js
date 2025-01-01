@@ -1,4 +1,5 @@
-import api from '../api/apiConfig';
+import API_BASE_URL from '../api/apiConfig';
+import axios from 'axios';
 
 /**
  * Lista todos os tipos de viaturas
@@ -6,23 +7,17 @@ import api from '../api/apiConfig';
  * @returns {Promise<Array>} - Lista de tipos
  */
 export const listarViaturaTipo = async(token) =>{
-  const response = await api.get('/viaturatipo/listar', {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.get(`${API_BASE_URL}/viaturatipo/listar`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json' 
+    },
   });
-  return Array.isArray(response.data?.tipos) ? response.data.tipos : [];
-};
-
-/**
- * Busca um tipo por ID
- * @param {string} id - ID do tipo
- * @param {string} token - Token de autenticação
- * @returns {Promise<Object>} - Dados do tipo
- */
-export const buscarViaturaTipoPorId = async(id, token) =>{
-  const response = await api.get(`/viaturatipo/listarPorId/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  if(response.data && Array.isArray(response.data.viaturatipo)){
+    return response.data.viaturatipo;
+  }else{
+    return [];
+  }
 };
 
 /**
@@ -32,22 +27,11 @@ export const buscarViaturaTipoPorId = async(id, token) =>{
  * @returns {Promise<Object>} - Dados do tipo criado
  */
 export const inserirViaturaTipo = async(tipo, token) =>{
-  const response = await api.post('/viaturatipo/novo', tipo, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-/**
- * Edita um tipo existente
- * @param {string} id - ID do tipo a ser editado
- * @param {Object} tipo - Dados atualizados do tipo
- * @param {string} token - Token de autenticação
- * @returns {Promise<Object>} - Dados do tipo atualizado
- */
-export const editarViaturaTipo = async(id, tipo, token) =>{
-  const response = await api.put(`/viaturatipo/update/${id}`, tipo, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.post(`${API_BASE_URL}/viaturatipo/novo`, tipo, {
+    headers: { 
+      Authorization: `Bearer ${token}`, 
+      'Content-Type': 'application/json'
+     },
   });
   return response.data;
 };
@@ -59,8 +43,11 @@ export const editarViaturaTipo = async(id, tipo, token) =>{
  * @returns {Promise<void>} - Confirmação da exclusão
  */
 export const deletarViaturaTipo = async(id, token) =>{
-  const response =await api.delete(`/viaturatipo/delete/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response =await axios.delete(`${API_BASE_URL}/viaturatipo/delete/${id}`, {
+    headers: { 
+      Authorization: `Bearer ${token}`, 
+      'Content-Type': 'application/json' 
+    },
   });
   return response.data;
 };

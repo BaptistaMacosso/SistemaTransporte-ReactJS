@@ -1,4 +1,5 @@
-import api from '../api/apiConfig';
+import API_BASE_URL from '../api/apiConfig';
+import axios from 'axios';
 
   /**
    * Lista todas as categorias de viaturas
@@ -6,23 +7,17 @@ import api from '../api/apiConfig';
    * @returns {Promise<Array>} - Lista de categorias
    */
   export const listarViaturaCategoria = async(token) =>{
-    const response = await api.get('/viaturacategoria/listar', {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.get(`${API_BASE_URL}/viaturacategoria/listar`, {
+      headers: { 
+        Authorization: `Bearer ${token}`, 
+        'Content-Type': 'application/json' 
+      },
     });
-    return Array.isArray(response.data?.viaturaCategoria) ? response.data.viaturaCategoria : [];
-  };
-
-  /**
-   * Busca uma categoria por ID
-   * @param {string} id - ID da categoria
-   * @param {string} token - Token de autenticação
-   * @returns {Promise<Object>} - Dados da categoria
-   */
-  export const buscarViaturaCategoriaPorId = async(id, token) =>{
-    const response = await api.get(`/viaturacategoria/listarPorId/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
+    if(response.data && Array.isArray(response.data.Categorias)){
+      return response.data.Categorias;
+    }else{
+      return [];
+    }
   };
 
   /**
@@ -32,22 +27,11 @@ import api from '../api/apiConfig';
    * @returns {Promise<Object>} - Dados da categoria criada
    */
   export const inserirViaturaCategoria = async(categoria, token) =>{
-    const response = await api.post('/viaturacategoria/novo', categoria, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  };
-
-  /**
-   * Edita uma categoria existente
-   * @param {string} id - ID da categoria a ser editada
-   * @param {Object} categoria - Dados atualizados da categoria
-   * @param {string} token - Token de autenticação
-   * @returns {Promise<Object>} - Dados da categoria atualizada
-   */
-  export const editarViaturaCategoria = async(id, categoria, token) => {
-    const response = await api.put(`/viaturacategoria/update/${id}`, categoria, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.post(`${API_BASE_URL}/viaturacategoria/novo`, categoria, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json' 
+      },
     });
     return response.data;
   };
@@ -59,7 +43,7 @@ import api from '../api/apiConfig';
    * @returns {Promise<void>} - Confirmação da exclusão
    */
   export const deletarViaturaCategoria = async(id, token) =>{
-    const response = await api.delete(`/viaturacategoria/delete/${id}`, {
+    const response = await axios.delete(`${API_BASE_URL}/viaturacategoria/delete/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;

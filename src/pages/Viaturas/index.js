@@ -2,16 +2,18 @@ import React, { useState, useContext, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
-import { TextField,Button,Grid2,CircularProgress } from '@mui/material';
-import { Add as AddIcon, Check } from '@mui/icons-material';
+import { TextField,Button,Grid2,CircularProgress, Card, Typography, TableContainer, 
+  Paper, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, IconButton, Dialog, 
+  DialogTitle, DialogContent, FormControl, InputLabel, Select, MenuItem, DialogActions,
+  TablePagination
+ } from '@mui/material';
+import { Add as AddIcon, Check, Edit as EditIcon, Delete as DeleteIcon, AirlineStops } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../contexts/auth';
 import { useNavigate } from 'react-router-dom';
 import { listarViatura, inserirViatura, editarViatura, deletarViatura } from '../../services/viaturasService';
 import {listarViaturaCategoria} from '../../services/viaturaCategoriaService';
 import {listarViaturaTipo} from '../../services/viaturaTipoService';
-import ViaturaDialog from '../../components/Viatura/viaturaDialog';
-import ViaturaDatagrid from '../../components/Viatura/viaturaDataGrid';
 
 
 const Viaturas = () => {
@@ -21,7 +23,7 @@ const Viaturas = () => {
   const { navigate } = useNavigate();
   const [open, setOpen] = useState(false);
   const [viaturaCategoria, setViaturaCategoria] = useState([]);
-  const [tipoViatura, setViaturaTipo] = useState([]);
+  const [tipoViatura, setTipoViatura] = useState([]);
   const [novaViatura, setNovaViatura] = useState({ 
     viaturaId: null, 
     viaturaTipoId: '',
@@ -38,6 +40,8 @@ const Viaturas = () => {
   const [viaturas, setViaturas] = useState([]);
   const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
   const [loading, setLoading] = useState(true); // Estado para gerenciar o carregamento.
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Número de linhas por página
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -102,6 +106,21 @@ const Viaturas = () => {
     ? viaturas.filter((carro) => carro.viaturaMatricula.toLowerCase().includes(filtro.toLowerCase())) 
     : [];
 
+  // Dados paginados
+  const displayedLicencas = viaturasFiltradas.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Resetar para a primeira página
+  };
+
   const handleSave = ()=>{
     if(isEdit){ 
       EditarViatura();
@@ -121,20 +140,20 @@ const Viaturas = () => {
     try{
       setLoading(true);
       const response = await listarViatura(token);
-      console.log(response.data);
-      if(response.status === 200){
-        setViaturas(response.data.viaturas);
+        if (response) {
+          setViaturas(response);
+          setLoading(false);
+        } else {
+          toast.warn("Nenhuma viatura encontrado ou formato inesperado.");
+          setViaturas([]); // Previna erros futuros
+          setLoading(false);
+        }
+      } catch (error) {
         setLoading(false);
-      }else{
-        setViaturas([]);
-        setLoading(false);
-      }
-    }catch(error){
-        toast.error('erro: Não foi possível carregar a lista de viaturas. Detalhes: '+error);
         setViaturas([]); // Previna erros futuros
-    }finally {
-      setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
-    };
+        toast.error("Erro: Não foi possível listar as viaturas. Verifique os detalhes no console.");
+        console.log("Detalhes: "+error);
+      }
   };
 
   //Salvar Viatura
@@ -205,14 +224,14 @@ const Viaturas = () => {
   const listarCategoriaViatura = async() =>{
     try{
       const response = await listarViaturaCategoria(token);
-      if (response.data.viaturaCategoria) {
-        setViaturaCategoria(response.data.viaturaCategoria);
-        console.log("Obter: "+response.data);
+      if (response) {
+        setViaturaCategoria(response);
       } else {
         setViaturaCategoria([]); // Previna erros futuros
       }
     }catch(error){
         toast.error('erro: Não foi possível listar a categoria da viatura. Detalhes: '+error);
+        setViaturaCategoria([]);
     }
   };
 
@@ -220,15 +239,14 @@ const Viaturas = () => {
   const listarTipoViatura = async() =>{
     try{
       const response = await listarViaturaTipo(token);
-      if (response.data.viaturatipo) {
-        setViaturaTipo(response.data.viaturatipo);
-        console.log("Obter Tipo: "+response.data);
+      if (response) {
+        setTipoViatura(response);
       } else {
-        setViaturaTipo([]); // Previna erros futuros
+        setTipoViatura([]); // Previna erros futuros
       }
     }catch(error){
         toast.error('erro: Não foi possível listar o tipo da viatura. Detalhes: '+error);
-        setViaturaTipo([]);
+        setTipoViatura([]);
     }
   };
 
@@ -286,25 +304,209 @@ const Viaturas = () => {
           </Grid2>
 
           {/* Modal de Adicionar Nova Viatura */}
-          <ViaturaDialog
-            open={open}
-            handleClose={handleClose}
-            handleSave={handleSave}
-            isEdit={isEdit}
-            novaViatura={novaViatura}
-            handleChange={handleChange}
-            tipoViatura={tipoViatura}
-            viaturaCategoria={viaturaCategoria}
-          />
-
+            <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>{isEdit ? "Editar Viatura" : "Nova Viatura"}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ maxWidth: 800, margin: "auto", padding: 3 }}>
+                <Grid2 container spacing={2}>
+                  <Grid2 item size={8}>
+                    <TextField
+                      autoFocus
+                      margin="dense"
+                      label="Marca"
+                      name="viaturaMarca"
+                      type="text"
+                      fullWidth
+                      value={novaViatura.viaturaMarca}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={4}>
+                    <TextField
+                      margin="dense"
+                      label="Modelo"
+                      name="viaturaModelo"
+                      type="text"
+                      fullWidth
+                      value={novaViatura.viaturaModelo}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={8}>
+                    <TextField
+                      margin="dense"
+                      label="Matrícula"
+                      name="viaturaMatricula"
+                      type="text"
+                      fullWidth
+                      value={novaViatura.viaturaMatricula}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={4}>
+                    <TextField
+                      margin="dense"
+                      label="Ano de Fabrico"
+                      name="viaturaAnoFabrica"
+                      type="number"
+                      fullWidth
+                      value={novaViatura.viaturaAnoFabrica}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={8}>
+                    <TextField
+                      margin="dense"
+                      label="Combustível"
+                      name="viaturaCombustivel"
+                      type="text"
+                      fullWidth
+                      value={novaViatura.viaturaCombustivel}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={4}>
+                    <TextField
+                      margin="dense"
+                      label="Viatura Cor"
+                      name="viaturaCor"
+                      type="text"
+                      fullWidth
+                      value={novaViatura.viaturaCor}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={8}>
+                    <TextField
+                      margin="dense"
+                      label="Quilometragem"
+                      name="quilometragem"
+                      type="number"
+                      fullWidth
+                      value={novaViatura.quilometragem}
+                      onChange={handleChange}
+                    />
+                  </Grid2>
+                  <Grid2 item size={4}>
+                    <FormControl fullWidth sx={{ marginBottom: 2, marginTop: 1 }}>
+                      <InputLabel id="tipo-select-label">Tipo</InputLabel>
+                      <Select
+                        labelId="tipo-select-label"
+                        name="viaturaTipoId"
+                        value={novaViatura.viaturaTipoId}
+                        label="Tipo de Viatura"
+                        onChange={handleChange}
+                      >
+                        {tipoViatura.map((tipo) => (
+                          <MenuItem key={tipo.id} value={tipo.id}>
+                            {tipo.viaturaTipo}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid2>
+                  <Grid2 item size={4}>
+                    <FormControl fullWidth sx={{ marginBottom: 2, marginTop: 1 }}>
+                      <InputLabel id="categoria-select-label">Categoria</InputLabel>
+                      <Select
+                        labelId="categoria-select-label"
+                        name="viaturaCategoriaId"
+                        value={novaViatura.viaturaCategoriaId}
+                        label="Categoria"
+                        onChange={handleChange}
+                      >
+                        {viaturaCategoria.map((categoria) => (
+                            console.log(categoria.id),
+                          <MenuItem key={categoria.id} value={categoria.id}>
+                            {categoria.viaturaCategoria}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid2>
+                </Grid2>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="secondary">
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} color="primary">
+                {isEdit ? "Salvar Alterações" : "Adicionar"}
+              </Button>
+            </DialogActions>
+          </Dialog>
+  
           <Box marginBottom={3} />
           {/* Tabela de Viaturas */}
           {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
-            <ViaturaDatagrid
-              viaturasFiltradas={viaturasFiltradas}
-              handleOpen={handleOpen}
-              excluirViatura={excluirViatura}
-            />
+            <Grid2 item xs={12}>
+            <Box marginBottom={2}/>
+            <Card>
+                <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Lista de Viaturas</Typography>
+                <TableContainer component={Paper}>
+                <Table aria-label="tabela de viaturas">
+                    <TableHead>
+                    <TableRow>
+                        <TableCell>Código</TableCell>
+                        <TableCell>Marca</TableCell>
+                        <TableCell>Modelo</TableCell>
+                        <TableCell>Matrícula</TableCell>
+                        <TableCell>Categoria</TableCell>
+                        <TableCell>Combustível</TableCell>
+                        <TableCell align="center">Ações</TableCell>
+                    </TableRow>
+                    </TableHead>
+                    <TableBody>
+                    {viaturasFiltradas?.length > 0 ? (viaturasFiltradas.map((viatura) => {
+                        return (
+                        <TableRow key={viatura.viaturaId}>
+                            <TableCell>{viatura.viaturaId}</TableCell>
+                            <TableCell>{viatura.viaturaMarca}</TableCell>
+                            <TableCell>{viatura.viaturaModelo}</TableCell>
+                            <TableCell>{viatura.viaturaMatricula}</TableCell>
+                            <TableCell>{viatura.viaturaCategoria.viaturaCategoria}</TableCell>
+                            <TableCell>{viatura.viaturaCombustivel}</TableCell>
+                            <TableCell align="center">
+                            <Tooltip title="Editar">
+                                <IconButton color="primary" onClick={() => handleOpen(viatura)}>
+                                <EditIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Atribuir Motorista">
+                                <IconButton color="sucess" onClick={() => handleOpen(viatura)}>
+                                <AirlineStops />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Excluir">
+                                <IconButton color="secondary" onClick={() => excluirViatura(viatura)}>
+                                <DeleteIcon />
+                                </IconButton>
+                            </Tooltip>
+                            </TableCell>
+                        </TableRow>
+                        );
+                    })
+                    ) : (
+                        <TableRow>
+                        <TableCell colSpan={6} align="center">Nenhuma viatura encontrada.</TableCell>
+                        </TableRow>
+                    )}
+                    </TableBody>
+                </Table>
+                </TableContainer>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={viaturasFiltradas.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="Linhas por página"
+                />
+            </Card>
+            </Grid2>
           )} {/*Fim do loading*/ }
         </Box>
       </Box>

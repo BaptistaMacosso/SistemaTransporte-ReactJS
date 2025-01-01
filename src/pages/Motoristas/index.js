@@ -4,13 +4,15 @@ import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,
   IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
-  CircularProgress
+  CircularProgress,
+  TablePagination
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, AirlineStops } from '@mui/icons-material';
 import { AuthContext } from '../../contexts/auth';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import {inserirMotorista, editarMotorista, deletarMotorista, listarMotoristas} from '../../services/motoristaService';
+
 
 const Motoristas = () => {
     // Recupera o token do contexto de autenticação ou localStorage
@@ -23,6 +25,8 @@ const Motoristas = () => {
     const [open, setOpen] = useState(false);
     const [filtro, setFiltro] = useState('');
     const { navigate } = useNavigate();
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5); // Número de linhas por página
 
     const handleOpen = (motoris) => {
       if(motoris.motoristaId === undefined){
@@ -47,7 +51,7 @@ const Motoristas = () => {
             DataValidade: motoris.DataValidade, 
             numeroBI: motoris.numeroBI});
           }
-          setOpen(true);
+        setOpen(true);
     };
 
     const handleClose = () => setOpen(false);
@@ -66,6 +70,21 @@ const Motoristas = () => {
     const motoristaFiltrado = Array.isArray(motoristas) 
     ? motoristas.filter((moto) => moto.motoristaNome.toLowerCase().includes(filtro.toLowerCase())) 
     : [];
+
+    // Dados paginados
+    const displayedLicencas = motoristaFiltrado.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0); // Resetar para a primeira página
+    };
       
     //.........................API...............................
     useEffect(()=>{
@@ -80,24 +99,21 @@ const Motoristas = () => {
     const fetchMotoristas = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('sistema-transporte-backend.vercel.app/api/motorista/listar',
-          {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
-          },
-        });
+        const response = await listarMotoristas(token);
         // Garanta que 'motorista' seja um array antes de setá-lo no estado
-        if (Array.isArray(response.data.motorista)) {
-          setMotoristas(response.data.motorista);
+        if (response) {
+          setMotoristas(response);
+          setLoading(false);
         } else {
+          toast.warn("Nenhum motorista encontrado ou formato inesperado.");
           setMotoristas([]); // Previna erros futuros
+          setLoading(false);
         }
       } catch (error) {
-        toast.error("Erro: Não foi possível carregar a lista de motoristas. Detalhes: "+error);
         setMotoristas([]); // Previna erros futuros
-      }finally{
-        setLoading(false);
-      };
+        toast.error("Erro: Não foi possível carregar a lista de motoristas. Verifique os detalhes no console.");
+        console.log("Detalhes: "+error);
+      }
     };
 
     const handleSave = async() => {
@@ -106,69 +122,58 @@ const Motoristas = () => {
       }else{
         if(!NovoMotorista.motoristaNome && !NovoMotorista.motoristaTelefone && !NovoMotorista.CartaDeConducaoNr &&
            !NovoMotorista.DataValidade && !NovoMotorista.numeroBI){
-            toast.error('Preencha todos os campos');
+            toast.error('Por favor, preencha todos os campo antes de salvar.');
         }else{
           try{
-            const response = await axios.post('sistema-transporte-backend.vercel.app/api/motorista/registar',
-            NovoMotorista,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
-                'Content-Type': 'application/json',
-              },
-            });
+            const response = await inserirMotorista(NovoMotorista,token);
             if(response.status === 201){
               toast.success(response.data.message);
+              fetchMotoristas();
+            }else{
+              toast.error(response.data.message);
             }
           }catch(error){
-            toast.error('Erro: não foi possível salvar o motorista. Detalhes: '+error);
+            toast.error('Erro: não foi possível salvar o motorista. Verifique os detalhes no console.');
+            console.log("Detalhes: "+error);
           }
         }
       }
       handleClose();
-      fetchMotoristas();
     };
 
     //Editar Motorista
     const handleEdit = async () =>{
       try{
-        const response = await axios.put(`sistema-transporte-backend.vercel.app/api/motorista/update/${NovoMotorista.motoristaId}`,
-        NovoMotorista,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await editarMotorista(NovoMotorista,token);
         if(response.status === 201){
           toast.success(response.data.message);
+          fetchMotoristas();
+        }else{
+          toast.error(response.data.message);
         }
       }catch(error){
-        toast.error('Erro: não foi possível salvar o motorista. Detalhes: '+error);
+        toast.error('Erro: não foi possível editar o motorista. Verifique os detalhes no console.');
+        console.log("Detalhes: "+error);
       }
-      fetchMotoristas();
     };
 
     //Delete Motorista
     const handleDelete = async (motorista) => {
       if (window.confirm('Tem certeza que deseja excluir este Motorista?')) {
         try {
-          const response = await axios.delete(`sistema-transporte-backend.vercel.app/api/motorista/delete/${motorista.motoristaId}`,
-            {
-              headers:{
-                'Authorization': `Bearer ${token}`,
-              }
-            });
+          const response = await deletarMotorista(motorista.motoristaId,token);
           if(response.status === 201) {
             toast.success(response.data.message);
+            fetchMotoristas();
+          }else{
+            toast.error(response.data.message);
           }
         } catch (error) {
-          toast.error('Erro: não foi possível excluir o motorista.'+error);
+          toast.error('Erro: não foi possível excluir o motorista. Verifica os detalhes no console.');
+          console.log("Detalhes: "+error);
         }
       }
-      fetchMotoristas();
     };
-
     //...........................................................
 
    return (
@@ -205,8 +210,10 @@ const Motoristas = () => {
                       <TableCell>Código</TableCell>
                       <TableCell>Nome do Motorista</TableCell>
                       <TableCell>Telemóvel</TableCell>
-                      <TableCell>Carta de Condução</TableCell>
-                      <TableCell>Número Bilhete</TableCell>
+                      <TableCell>Endereço de e-mail</TableCell>
+                      <TableCell>Nrº Bilhete</TableCell>
+                      <TableCell>Nrº Carta de Condução</TableCell>
+                      <TableCell>Data Validade</TableCell>
                       <TableCell align="center">Ações</TableCell>
                     </TableRow>
                   </TableHead>
@@ -218,13 +225,20 @@ const Motoristas = () => {
                           <TableCell>{motorista.motoristaId}</TableCell>
                           <TableCell>{motorista.motoristaNome}</TableCell>
                           <TableCell>{motorista.motoristaTelefone}</TableCell>
-                          <TableCell>{motorista.CartaDeConducaoNr}</TableCell>
+                          <TableCell>{motorista.motoristaEmail}</TableCell>
                           <TableCell>{motorista.numeroBI}</TableCell>
+                          <TableCell>{motorista.CartaDeConducaoNr}</TableCell>
+                          <TableCell>{motorista.DataValidade}</TableCell>
                           <TableCell align="center">
                             <Tooltip title="Editar">
                               <IconButton color="primary" onClick={() => handleOpen(motorista)}>
                                 <EditIcon />
                               </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Atribuir Viatura">
+                                <IconButton color="sucess" onClick={() => handleOpen(motorista)}>
+                                <AirlineStops />
+                                </IconButton>
                             </Tooltip>
                             <Tooltip title="Excluir">
                               <IconButton color="secondary" onClick={() => handleDelete(motorista)}>
@@ -243,6 +257,16 @@ const Motoristas = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={motoristaFiltrado.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Linhas por página"
+              />
             </Card>
           </Grid2>
           )} {/*Fim do loading*/ }
@@ -251,25 +275,30 @@ const Motoristas = () => {
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>{isEdit===true ? 'Editar Motorista' : 'Adicionar Novo Motorista' }</DialogTitle>
             <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Nome"
-                name="motoristaNome"
-                type="text"
-                fullWidth
-                value={NovoMotorista.motoristaNome}
-                onChange={handleChange}
-              />
-              <TextField
-                margin="dense"
-                label="Email"
-                name="motoristaEmail"
-                fullWidth
-                type="email"
-                value={NovoMotorista.motoristaEmail}
-                onChange={handleChange}
-              />
+              <Grid2 item size={12}>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  label="Nome"
+                  name="motoristaNome"
+                  type="text"
+                  fullWidth
+                  value={NovoMotorista.motoristaNome}
+                  onChange={handleChange}
+                />
+              </Grid2>
+              <Grid2 item size={12}>
+                <TextField
+                  margin="dense"
+                  label="Email"
+                  name="motoristaEmail"
+                  fullWidth
+                  type="email"
+                  value={NovoMotorista.motoristaEmail}
+                  onChange={handleChange}
+                />
+              </Grid2>
+              <Grid2 item size={4}>
               <TextField
                 margin="dense"
                 label="Telefone"
@@ -279,15 +308,18 @@ const Motoristas = () => {
                 value={NovoMotorista.motoristaTelefone}
                 onChange={handleChange}
               />
-              <TextField
-                margin="dense"
-                label="Carta de Condução"
-                name="CartaDeConducaoNr"
-                type="text"
-                fullWidth
-                value={NovoMotorista.CartaDeConducaoNr}
-                onChange={handleChange}
-              />
+              </Grid2>
+              <Grid2 item size={4}>
+                <TextField
+                  margin="dense"
+                  label="Carta de Condução"
+                  name="CartaDeConducaoNr"
+                  type="text"
+                  fullWidth
+                  value={NovoMotorista.CartaDeConducaoNr}
+                  onChange={handleChange}
+                />
+              </Grid2>
               <TextField
                 margin="dense"
                 label="Data Validade"
