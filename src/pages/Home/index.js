@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card, CardContent, Grid2, Stack, Typography } from '@mui/material';
-import './style.css';
+//import './style.css';
 
 const Home = () => {
 
