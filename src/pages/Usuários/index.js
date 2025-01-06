@@ -8,13 +8,15 @@ import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,Tabl
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Stack,
+  CardContent
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Badge } from '@mui/icons-material';
 import { AuthContext } from '../../contexts/auth';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { deletarUsuario, editarUsuario, inserirUsuario, listarUsuarios } from '../../services/userService';
 
 
 const Usuarios = () => {
@@ -72,6 +74,94 @@ const Usuarios = () => {
     ? users.filter((user) => user.userNome.toLowerCase().includes(filtro.toLowerCase())) 
     : [];
 
+  // Função para lidar com a mudança no formulário
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNovoUsuario({ ...novoUsuario, [name]: value });
+  };
+
+  //............................API...............................................
+  // Função para buscar dados da API
+  const fetchUsers = async () => {
+      try {
+        setLoading(true); // Inicia o carregamento
+        const response = await listarUsuarios(token); 
+        if(response){
+          setUsers(response);
+          setLoading(false);
+        }else{
+          setUsers([]);
+          toast.warn("Nenhum usuário encontrado ou formato inesperado.");
+        }
+      } catch (error) {
+        setUsers([]); // Previna erros futuros
+        toast.error("Erro: Não foi possível listar os usuários. Verifique os detalhes no console.");
+        console.log("Detalhes: "+error);
+      } 
+  };
+
+  // Função para salvar ou editar usuário
+  const handleSave = () => {
+    if(isEdit){ 
+      handleEditarUsuario();
+      setIsEdit(false);
+      setOpen(false);
+    }else{
+      handleNovoUsuario();
+      setOpen(false);
+    }
+  }; 
+
+  //Criar Usuários
+  const handleNovoUsuario = async () => {
+    try {
+          const response = await inserirUsuario(novoUsuario, token);
+          if(response.status === 201){
+            toast.success(response.message);
+            fetchUsers();
+          }else{
+            toast.success(response.message);
+          }
+        } catch (error) {
+          toast.error("Erro: Não foi possível criar o usuário. Verifique os detalhes no console.");
+          console.log("Detalhes: "+error);
+        }
+  };
+
+  //Editar Usuários
+  const handleEditarUsuario = async () => {
+    try {
+      const response = await editarUsuario(novoUsuario.userId, novoUsuario, token);
+      if(response.status === 201){
+        toast.success(response.message);
+        fetchUsers();
+      }else{
+        toast.success(response.message);
+      }
+    } catch (error) {
+      toast.error("Erro: Não foi possível editar o usuário. Verifique os detalhes no console.");
+      console.log("Detalhes: "+error);
+    }
+  };
+
+  //Delete Usuários
+  const handleDelete = async (user) => {
+    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
+      try {
+        const response = await deletarUsuario(user.userId, token);
+        if(response.status === 201) {
+          toast.success(response.data.message);
+          fetchUsers();
+        }else{
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error("Erro: Não foi possível excluir o usuário. Verifique os detalhes no console.");
+        console.log("Detalhes: "+error);
+      }
+    }
+  };
+
   //UseEffect
   useEffect(() => {
     if (!isAuthenticated) {
@@ -83,106 +173,6 @@ const Usuarios = () => {
     }
   }, [isAuthenticated, logout]);
 
-  //............................API...............................................
-  // Função para buscar dados da API
-  const fetchUsers = async () => {
-      try {
-        setLoading(true); // Inicia o carregamento
-        const response = await axios.get('https://sistema-transporte-backend.vercel.app/api/auth/listar', {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Passa o token no cabeçalho
-          },
-        }); 
-        // Garanta que 'users' seja um array antes de setá-lo no estado
-        if (Array.isArray(response.data.allUsers)) {
-          setUsers(response.data.allUsers);
-        } else {
-          setUsers([]); // Previna erros futuros
-        }
-      } catch (error) {
-        toast.error("Erro: Não foi possível carregar a lista de usuários. Verifique os parametros da API."+error);
-        setUsers([]); // Previna erros futuros
-      } finally {
-        setLoading(false); // Finaliza o carregamento, seja com sucesso ou erro
-    };
-  };
-
-  // Função para lidar com a mudança no formulário
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNovoUsuario({ ...novoUsuario, [name]: value });
-  };
-
-  // Função para salvar ou editar usuário
-  const handleSave = async() => {
-    if (isEdit) {
-      // Edição de usuário
-      try {
-        if (!novoUsuario.userNome && !novoUsuario.userEmail) {
-          toast.warning("Preencha todos os campos");
-          return;
-        }else{
-            const response = await axios.put(`https://sistema-transporte-backend.vercel.app/api/auth/update/${novoUsuario.userId}`, 
-              novoUsuario,
-              {
-                headers:{
-                  'Authorization': `Bearer ${token}`
-                }
-              });
-            if(response.status === 201) {
-                toast.success(response.data.message);
-            }
-        }  
-      } catch (err) {
-        toast.error('Erro: não foi possível salvar o usuário. Detalhes: '+err);
-      }
-  
-    } else {
-      // Adição de novo usuário
-      try {
-        if (!novoUsuario.userNome && !novoUsuario.userEmail && !novoUsuario.userPassword && !novoUsuario.tipoUsuarioId) {
-          toast.warning("Preencha todos os campos");
-          return;
-        }else{
-            const response = await axios.post('https://sistema-transporte-backend.vercel.app/api/auth/register', 
-              {
-                userNome: novoUsuario.userNome,
-                userEmail: novoUsuario.userEmail,
-                userPassword: novoUsuario.userPassword,
-                tipoUsuarioId: novoUsuario.tipoUsuarioId
-              });
-            if(response.status === 201) {
-                toast.success(response.data.message);
-            }
-        }  
-      } catch (err) {
-        toast.error('Erro: não foi possível salvar o usuário. Detalhes: '+err);
-      }
-    }
-    handleClose();
-    fetchUsers();
-  }; 
-
-  //Delete Usuários
-  const handleDelete = async (user) => {
-    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
-      try {
-        const response = await axios.delete(`https://sistema-transporte-backend.vercel.app/api/auth/delete/${user.userId}`);
-        if(response.status === 201) {
-          toast.success(response.data.message);
-        }
-      } catch (error) {
-        toast.error('Erro: não foi possível excluir o usuário.'+error);
-      }
-      fetchUsers();
-    }
-  };
-
-  //Perfíl do Usuário.
-  const handlePerfil = async (user)=>{
-    toast.info('Carregando o perfíl do usuário. '+user.userNome);
-  };
-
   //...........................................................................
 
   return (
@@ -192,82 +182,87 @@ const Usuarios = () => {
       <Box sx={{ display: 'flex' }}  paddingLeft={1} paddingRight={1}>
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-           {/* Botão de Adicionar e Campo de Pesquisa */}
-           <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-                <TextField
-                  label="Pesquisar por nome"
-                  variant="outlined"
-                  value={filtro}
-                  onChange={handleSearch}
-                  sx={{ marginBottom: 2 }}
-                />
-                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-                  Novo Usuário
-                </Button>
-            </Grid2>
+        <Stack spacing={2} direction="row" sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', height: 90 }}>
+            <CardContent>
+              {/* Botão de Adicionar e Campo de Pesquisa */}
+              <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
+                    <TextField
+                      label="Pesquisar por nome"
+                      variant="outlined"
+                      value={filtro}
+                      onChange={handleSearch}
+                      sx={{ marginBottom: 2 }}
+                    />
+                    <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
+                      Novo Usuário
+                    </Button>
+                </Grid2>
+                </CardContent>
+              </Card>
+            </Stack>
             {/* Tabela de Viaturas */}
             <Box marginBottom={3} />
             {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
             <Grid2 item xs={12}>
-            <Box marginBottom={2}/>
-              <Card>
-                <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Lista de Usuários</Typography>
-                <TableContainer component={Paper}>
-                  <Table aria-label="tabela de usuários">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Código</TableCell>
-                        <TableCell>Nome Usuário</TableCell>
-                        <TableCell>Endereço de E-mail</TableCell>
-                        <TableCell>Tipo de Usuário</TableCell>
-                        <TableCell align="center">Ações</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                    {usuarioFiltrado?.length > 0 ? (
-                      usuarioFiltrado.map((user) => {
-                        return (
-                          <TableRow key={user.userId}>
-                            <TableCell>{user.userId}</TableCell>
-                            <TableCell>{user.userNome}</TableCell>
-                            <TableCell>{user.userEmail}</TableCell>
-                            <TableCell>{user.tipoUser.descricaoTipo}</TableCell>
-                            <TableCell align="center">
-                              <Tooltip title="Editar">
-                                <IconButton color="primary" onClick={() => handleOpen(user)}>
-                                  <EditIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Perfíl do Usuário">
-                                <IconButton color="success" onClick={() => handlePerfil(user)}>
-                                  <Badge/>
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Excluir">
-                                <IconButton color="secondary" onClick={() => handleDelete(user)}>
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
-                      ) : (
+              <Box marginBottom={2}/>
+                <Card>
+                  <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Lista de Usuários</Typography>
+                  <TableContainer component={Paper}>
+                    <Table aria-label="tabela de usuários">
+                      <TableHead>
                         <TableRow>
-                          <TableCell colSpan={6} align="center">Nenhum usuário encontrado.</TableCell>
+                          <TableCell>Código</TableCell>
+                          <TableCell>Nome Usuário</TableCell>
+                          <TableCell>Endereço de E-mail</TableCell>
+                          <TableCell>Tipo de Usuário</TableCell>
+                          <TableCell align="center">Ações</TableCell>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Card>
-            </Grid2>
+                      </TableHead>
+                      <TableBody>
+                      {usuarioFiltrado?.length > 0 ? (
+                        usuarioFiltrado.map((user) => {
+                          return (
+                            <TableRow key={user.userId}>
+                              <TableCell>{user.userId}</TableCell>
+                              <TableCell>{user.userNome}</TableCell>
+                              <TableCell>{user.userEmail}</TableCell>
+                              <TableCell>{user.tipoUser.descricaoTipo}</TableCell>
+                              <TableCell align="center">
+                                <Tooltip title="Editar">
+                                  <IconButton color="primary" onClick={() => handleOpen(user)}>
+                                    <EditIcon />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Perfíl do Usuário">
+                                  <IconButton color="success" onClick={() => nagivate(`/DetalhePerfilUsuario/${user.userId}`)}>
+                                    <Badge/>
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Excluir">
+                                  <IconButton color="secondary" onClick={() => handleDelete(user)}>
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={6} align="center">Nenhum usuário encontrado.</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Card>
+              </Grid2>
             )} {/*Fim do loading*/ }
-
 
             {/* Modal de Adicionar Nova Viatura */}
             <Dialog open={open} onClose={handleClose}>
-              <DialogTitle>{isEdit===true ? 'Editar Usuário' : 'Adicionar Usuário' }</DialogTitle>
+              <DialogTitle>{isEdit ? 'Editar Usuário' : 'Adicionar Usuário' }</DialogTitle>
               <DialogContent>
                 <TextField
                   autoFocus
@@ -318,7 +313,7 @@ const Usuarios = () => {
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleClose} color="secondary">Cancelar</Button>
-                <Button onClick={handleSave} color="primary">{isEdit===true ? 'Salvar Alterações' : 'Adicionar' }</Button>
+                <Button onClick={handleSave} color="primary">{isEdit ? 'Salvar Alterações' : 'Adicionar' }</Button>
               </DialogActions>
             </Dialog>        
 

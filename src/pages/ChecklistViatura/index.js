@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
-import { TextField,Button,Grid2,CircularProgress, Card, Typography, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, IconButton, Paper, Dialog, DialogTitle, DialogContent, FormControl, InputLabel, Select, MenuItem, DialogActions, TablePagination } from '@mui/material';
+import { TextField,Button,Grid2,CircularProgress, Card, Typography, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, IconButton, Paper, Dialog, DialogTitle, DialogContent, FormControl, InputLabel, Select, MenuItem, DialogActions, TablePagination, Stack, CardContent } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { listarChecklist, inserirChecklist, deletarChecklist } from '../../services/checklistService';
 import {listarTipoManutencao} from '../../services/tipoManutencaoService';
@@ -228,27 +228,32 @@ const CheckViatura = () => {
       <Box sx={{ display: 'flex' }} paddingLeft={1} paddingRight={1}>
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        {/**/}
-          {/* Botão de Adicionar e Campo de Pesquisa */}
-          <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-            <TextField
-              label="Pesquisar por Matrícula"
-              variant="outlined"
-              value={filtro}
-              onChange={handleSearch}
-              sx={{ marginBottom: 2 }}
-            />
-            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-              Nova Verificação
-            </Button>
-          </Grid2>
+        <Stack spacing={2} direction="row" sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', height: 90 }}>
+            <CardContent>
+            {/* Botão de Adicionar e Campo de Pesquisa */}
+            <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
+              <TextField
+                label="Pesquisar por Matrícula"
+                variant="outlined"
+                value={filtro}
+                onChange={handleSearch}
+                sx={{ marginBottom: 2 }}
+              />
+              <Button variant="contained" color="success" startIcon={<AddIcon />} onClick={handleOpen}>
+                Novo Checklist
+              </Button>
+            </Grid2>
+          </CardContent>
+          </Card>
+        </Stack>
           <Box marginBottom={3} />
           {/* Tabela de Viaturas */}
           {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
             <Grid2 item xs={12}>
             <Box marginBottom={2} />
             <Card>
-                <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Checklist de Verificação</Typography>
+                <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Viaturas Verificadas</Typography>
                 <TableContainer component={Paper}>
                 <Table aria-label="Checklist de Verificação">
                     <TableHead>
@@ -309,7 +314,7 @@ const CheckViatura = () => {
           {/**/}
           {/* Modal de Adicionar Nova Viatura */}
           <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{isEdit===true ? 'Editar Verificação' : 'Nova Verificação' }</DialogTitle>
+          <DialogTitle>{isEdit ? 'Editar Checklist' : 'Novo Checklist' }</DialogTitle>
           <DialogContent>
           <FormControl fullWidth sx={{ marginBottom: 2, marginTop: 1 }}>
               <InputLabel id="role-select-label">Tipo</InputLabel>
@@ -383,7 +388,7 @@ const CheckViatura = () => {
           </DialogContent>
           <DialogActions>
           <Button onClick={handleClose} color="secondary">Cancelar</Button>
-          <Button onClick={handleSave} color="primary">{isEdit===true ? 'Salvar Alterações' : 'Adicionar' }</Button>
+          <Button onClick={handleSave} color="primary">{isEdit ? 'Salvar Alterações' : 'Adicionar' }</Button>
           </DialogActions>
       </Dialog>
         </Box>

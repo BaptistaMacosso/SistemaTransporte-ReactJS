@@ -9,7 +9,9 @@ import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,Tabl
   InputLabel,
   Select,
   MenuItem,
-  TablePagination
+  TablePagination,
+  CardContent,
+  Stack
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -118,7 +120,7 @@ const LicencaPublicidade = () => {
           listarPublicidades();
         }
         else if(response.status === 400){
-          toast.success(response.message);
+          toast.warn(response.message);
         }
       } catch (error) {
         toast.error(error.response.message);
@@ -200,20 +202,26 @@ const LicencaPublicidade = () => {
       <Box sx={{ display: 'flex' }}  paddingLeft={1} paddingRight={1}>
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-            {/* Botão de Adicionar e Campo de Pesquisa */}
-            <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-                <TextField
-                  label="Pesquisar por licença"
-                  variant="outlined"
-                  value={filtro}
-                  onChange={handleSearch}
-                  sx={{ marginBottom: 2 }}
-                />
-                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-                  Nova Licença
-                </Button>
-            </Grid2>
-            {/* Tabela de Publicidade */}
+        <Stack spacing={2} direction="row" sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', height: 90 }}>
+            <CardContent>
+                {/* Botão de Adicionar e Campo de Pesquisa */}
+                <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
+                    <TextField
+                      label="Pesquisar por Licença"
+                      variant="outlined"
+                      value={filtro}
+                      onChange={handleSearch}
+                      sx={{ marginBottom: 2 }}
+                    />
+                    <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
+                      Nova Licença
+                    </Button>
+                </Grid2>
+                {/* Tabela de Publicidade */}
+                </CardContent>
+              </Card>
+            </Stack>
             <Box marginBottom={3} />
             {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
             <Grid2 item xs={12}>

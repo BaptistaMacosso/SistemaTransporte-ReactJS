@@ -5,7 +5,9 @@ import NavBar from '../../components/NavBar';
 import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,
   IconButton,Tooltip,TextField,Dialog,DialogActions,DialogContent,DialogTitle,Button,Grid2,
   CircularProgress,
-  TablePagination
+  TablePagination,
+  Stack,
+  CardContent
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, AirlineStops } from '@mui/icons-material';
 import { AuthContext } from '../../contexts/auth';
@@ -183,19 +185,25 @@ const Motoristas = () => {
       <Box sx={{ display: 'flex' }} paddingLeft={1} paddingRight={1}>
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          {/* Botão de Adicionar e Campo de Pesquisa */}
-          <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-              <TextField
-                label="Pesquisar por nome"
-                variant="outlined"
-                value={filtro}
-                onChange={handleSearch}
-                sx={{ marginBottom: 2 }}
-              />
-              <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-                Novo Motorista
-              </Button>
-          </Grid2>
+        <Stack spacing={2} direction="row" sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', height: 90 }}>
+            <CardContent>
+              {/* Botão de Adicionar e Campo de Pesquisa */}
+              <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
+                  <TextField
+                    label="Pesquisar por Nome"
+                    variant="outlined"
+                    value={filtro}
+                    onChange={handleSearch}
+                    sx={{ marginBottom: 2 }}
+                  />
+                  <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
+                    Novo Motorista
+                  </Button>
+              </Grid2>
+              </CardContent>
+              </Card>
+            </Stack>
           {/* Tabela de Viaturas */}
           <Box marginBottom={3}/>
           {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (

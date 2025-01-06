@@ -5,8 +5,11 @@ export const listarTipoManutencao = async (token) => {
   const response = await axios.get(`${API_BASE_URL}/tipomanutencao/listar`, {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
-  console.log("Tipo de manutenção encontrados: "+response.data.tipos);
-  return Array.isArray(response.data.tipos) ? response.data.tipos : [];
+  if(response.data && Array.isArray(response.data.tipos)){
+    return response.data.tipos;
+  }else{
+    return [];
+  }
 };
 
 export const buscarTipoManutencaoPorId = async (id, token) => {

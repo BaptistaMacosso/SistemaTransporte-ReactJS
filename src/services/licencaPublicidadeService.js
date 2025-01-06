@@ -60,7 +60,6 @@ export const editarLicencaPublicidade = async (id, novaLicencaPublicidade, token
 * @returns {Promise<Object>} - Dados do publicidade deletado
 */
 export const deletarLicencaPublicidade = async (id, token) => {
-  console.log("Codigo recebido: "+id);
     const response = await axios.delete(`${API_BASE_URL}/licencapublicidade/delete/${id}`,{
       headers: { 
         Authorization: `Bearer ${token}`, 

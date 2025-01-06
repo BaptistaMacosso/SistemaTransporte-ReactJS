@@ -8,7 +8,10 @@ import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,Tabl
   InputLabel,
   Select,
   MenuItem,
-  TablePagination
+  TablePagination,
+  Stack,
+  CardContent,
+  CircularProgress
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -224,87 +227,95 @@ const LicencaTransporte = () => {
       <Box sx={{ display: 'flex' }}  paddingLeft={1} paddingRight={1}>
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-            {/* Botão de Adicionar e Campo de Pesquisa */}
-            <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-                <TextField
-                  label="Pesquisar por matrícula"
-                  variant="outlined"
-                  value={filtro}
-                  onChange={handleSearch}
-                  sx={{ marginBottom: 2 }}
-                />
-                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-                  Nova Licença
-                </Button>
-            </Grid2>
+        <Stack spacing={2} direction="row" sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', height: 90 }}>
+            <CardContent>
+                {/* Botão de Adicionar e Campo de Pesquisa */}
+                <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
+                    <TextField
+                      label="Pesquisar por Matrícula"
+                      variant="outlined"
+                      value={filtro}
+                      onChange={handleSearch}
+                      sx={{ marginBottom: 2 }}
+                    />
+                    <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
+                      Nova Licença
+                    </Button>
+                </Grid2>
+                </CardContent>
+              </Card>
+            </Stack>
             {/* Tabela de Publicidade */}
             <Box marginBottom={3} />
+            {loading ? ( <CircularProgress alignItems="center" justifyContent="center" /> ) : (
             <Grid2 item xs={12}>
-            <Box marginBottom={2} />
-              <Card>
-                <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Licenças de Transporte</Typography>
-                <TableContainer component={Paper}>
-                  <Table aria-label="tabela de licença de transporte">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Código</TableCell>
-                        <TableCell>Marca</TableCell>
-                        <TableCell>Modelo</TableCell>
-                        <TableCell>Matrícula</TableCell>
-                        <TableCell>Descrição Licença</TableCell>
-                        <TableCell>Data Validade</TableCell>
-                        <TableCell>Estado</TableCell>
-                        <TableCell align="center">Ações</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {licencaTransporteFiltradas.length > 0 ? (licencaTransporteFiltradas.map((licenca) => {
-                        const diasParaVencimento = differenceInDays(parseISO(licenca.dataVencimento), hoje);
-                        const highlight = diasParaVencimento <= 15 ? { backgroundColor: '#EEEED1' } : {};
-
-                        return (
-                          <TableRow key={licenca.id} style={highlight}>
-                            <TableCell>{licenca.id}</TableCell>
-                            <TableCell>{licenca.viatura.viaturaMarca}</TableCell>
-                            <TableCell>{licenca.viatura.viaturaModelo}</TableCell>
-                            <TableCell>{licenca.viatura.viaturaMatricula}</TableCell>
-                            <TableCell>{licenca.descricao}</TableCell>
-                            <TableCell>{licenca.dataVencimento}</TableCell>
-                            <TableCell>{licenca.licencaStatus ? 'Activo' : 'Inactivo'}</TableCell>
-                            <TableCell align="center">
-                              <Tooltip title="Editar">
-                                <IconButton color="primary" onClick={() => handleOpen(licenca)}>
-                                  <EditIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Excluir">
-                                <IconButton color="secondary" onClick={() => handleDelete(licenca)}>
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })):(
+              <Box marginBottom={2} />
+                <Card>
+                  <Typography variant="h6" sx={{ padding: 2, backgroundColor: 'primary.main', color: 'white' }}>Licenças de Transporte</Typography>
+                  <TableContainer component={Paper}>
+                    <Table aria-label="tabela de licença de transporte">
+                      <TableHead>
                         <TableRow>
-                          <TableCell colSpan={7} align="center">Nenhuma licença de transporte encontrada.</TableCell>
+                          <TableCell>Código</TableCell>
+                          <TableCell>Marca</TableCell>
+                          <TableCell>Modelo</TableCell>
+                          <TableCell>Matrícula</TableCell>
+                          <TableCell>Descrição Licença</TableCell>
+                          <TableCell>Data Validade</TableCell>
+                          <TableCell>Estado</TableCell>
+                          <TableCell align="center">Ações</TableCell>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 25]}
-                  component="div"
-                  count={licencaTransporteFiltradas.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  labelRowsPerPage="Linhas por página"
-                />
-              </Card>
-            </Grid2>
+                      </TableHead>
+                      <TableBody>
+                        {licencaTransporteFiltradas.length > 0 ? (licencaTransporteFiltradas.map((licenca) => {
+                          const diasParaVencimento = differenceInDays(parseISO(licenca.dataVencimento), hoje);
+                          const highlight = diasParaVencimento <= 15 ? { backgroundColor: '#EEEED1' } : {};
+
+                          return (
+                            <TableRow key={licenca.id} style={highlight}>
+                              <TableCell>{licenca.id}</TableCell>
+                              <TableCell>{licenca.viatura.viaturaMarca}</TableCell>
+                              <TableCell>{licenca.viatura.viaturaModelo}</TableCell>
+                              <TableCell>{licenca.viatura.viaturaMatricula}</TableCell>
+                              <TableCell>{licenca.descricao}</TableCell>
+                              <TableCell>{licenca.dataVencimento}</TableCell>
+                              <TableCell>{licenca.licencaStatus ? 'Activo' : 'Inactivo'}</TableCell>
+                              <TableCell align="center">
+                                <Tooltip title="Editar">
+                                  <IconButton color="primary" onClick={() => handleOpen(licenca)}>
+                                    <EditIcon />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Excluir">
+                                  <IconButton color="secondary" onClick={() => handleDelete(licenca)}>
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })):(
+                          <TableRow>
+                            <TableCell colSpan={7} align="center">Nenhuma licença de transporte encontrada.</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={licencaTransporteFiltradas.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Linhas por página"
+                  />
+                </Card>
+              </Grid2>
+            )} {/*Fim do loading*/ }
             {/* Modal de Adicionar Nova Viatura */}
             <Dialog open={open} onClose={handleClose}>
               <DialogTitle>{isEdit ? "Editar Licença" : "Nova Licença"}</DialogTitle>

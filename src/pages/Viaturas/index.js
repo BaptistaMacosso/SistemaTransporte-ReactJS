@@ -5,7 +5,9 @@ import NavBar from '../../components/NavBar';
 import { TextField,Button,Grid2,CircularProgress, Card, Typography, TableContainer, 
   Paper, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, IconButton, Dialog, 
   DialogTitle, DialogContent, FormControl, InputLabel, Select, MenuItem, DialogActions,
-  TablePagination
+  TablePagination,
+  Stack,
+  CardContent
  } from '@mui/material';
 import { Add as AddIcon, Check, Edit as EditIcon, Delete as DeleteIcon, AirlineStops } from '@mui/icons-material';
 import { toast } from 'react-toastify';
@@ -20,7 +22,7 @@ const Viaturas = () => {
   // Recupera o token do contexto de autenticação ou localStorage
   const { token } = useContext(AuthContext) || { token: localStorage.getItem('token') };
   const { isAuthenticated, logout  } = useContext(AuthContext);
-  const { navigate } = useNavigate();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [viaturaCategoria, setViaturaCategoria] = useState([]);
   const [tipoViatura, setTipoViatura] = useState([]);
@@ -283,26 +285,31 @@ const Viaturas = () => {
       <Box sx={{ display: 'flex' }} paddingLeft={1} paddingRight={1}>
         <Dashboard />
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          {/* Botão de Adicionar e Campo de Pesquisa */}
-          <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-            <TextField
-              label="Buscar por matrícula"
-              variant="outlined"
-              value={filtro}
-              onChange={handleSearch}
-              sx={{ marginBottom: 2 }}
-            />
-            <Grid2 item xs={12} display="flex" justifyContent="space-between">
-              <Button variant="contained" color='success' marginRight={1} startIcon={<Check />} onClick={handleOpen}>
-                Realizar Checklist
-              </Button>
-              <Box sx={{ marginLeft: 1 }} />
-              <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
-                Nova Viatura
-              </Button>
-            </Grid2>
-          </Grid2>
-
+        <Stack spacing={2} direction="row" sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', height: 90 }}>
+            <CardContent>
+              {/* Botão de Adicionar e Campo de Pesquisa */}
+                <Grid2 item xs={12} display="flex" justifyContent="space-between" alignItems="center">
+                  <TextField
+                    label="Buscar por Matrícula"
+                    variant="outlined"
+                    value={filtro}
+                    onChange={handleSearch}
+                    sx={{ marginBottom: 2 }}
+                  />
+                  <Grid2 item xs={12} display="flex" justifyContent="space-between">
+                    <Button variant="contained" color='success' marginRight={1} startIcon={<Check />} onClick={()=>navigate('/CheckViatura')}>
+                      Realizar Checklist
+                    </Button>
+                    <Box sx={{ marginLeft: 1 }} />
+                    <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
+                      Nova Viatura
+                    </Button>
+                  </Grid2>
+                </Grid2>
+              </CardContent>
+            </Card>
+          </Stack>
           {/* Modal de Adicionar Nova Viatura */}
             <Dialog open={open} onClose={handleClose}>
             <DialogTitle>{isEdit ? "Editar Viatura" : "Nova Viatura"}</DialogTitle>

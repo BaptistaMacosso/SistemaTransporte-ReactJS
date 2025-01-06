@@ -13,7 +13,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { CarCrash, Handyman, Home, LocalShipping, Logout, PeopleAlt, Settings } from '@mui/icons-material';
+import { CarCrash, Handyman, Home, LocalShipping, Logout, PeopleAlt, Settings, TireRepair } from '@mui/icons-material';
 import AirlineSeatReclineExtraIcon from '@mui/icons-material/AirlineSeatReclineExtra';
 import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import { useNavigate } from 'react-router-dom';
@@ -181,7 +181,7 @@ export default function Dashboard() {
                  <CarCrash />
                 </ListItemIcon>
                 <ListItemText
-                  primary= "Viatura Verificação"
+                  primary= "Realizar Checklist"
                   sx={[
                     open
                       ? {
@@ -229,6 +229,53 @@ export default function Dashboard() {
                 </ListItemIcon>
                 <ListItemText
                   primary= "Manutenção"
+                  sx={[
+                    open
+                      ? {
+                          opacity: 1,
+                        }
+                      : {
+                          opacity: 0,
+                        },
+                  ]}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/PedidoAsistenciaTecnica')}>
+              <ListItemButton
+                sx={[
+                  {
+                    minHeight: 48,
+                    px: 2.5,
+                  },
+                  open
+                    ? {
+                        justifyContent: 'initial',
+                      }
+                    : {
+                        justifyContent: 'center',
+                      },
+                ]}
+              >
+                <ListItemIcon
+                  sx={[
+                    {
+                      minWidth: 0,
+                      justifyContent: 'center',
+                    },
+                    open
+                      ? {
+                          mr: 3,
+                        }
+                      : {
+                          mr: 'auto',
+                        },
+                  ]}
+                >
+                 <TireRepair />
+                </ListItemIcon>
+                <ListItemText
+                  primary= "Asistência Técnica"
                   sx={[
                     open
                       ? {
