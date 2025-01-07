@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Dashboard from '../../components/Dashboard/dashboard';
 import NavBar from '../../components/NavBar';
 import { Card, CardContent, Grid2, Stack, Typography } from '@mui/material';
+import { toast } from 'react-toastify';
 //import './style.css';
 
 const Home = () => {
-
+    useEffect(()=>{
+      toast.warn("Esta página ainda está em desenvolvimento. Pedimos desculpas por qualquer inconveniente causado e agradecemos sua compreensão. Estamos trabalhando para disponibilizá-la o mais breve possível!");
+    });
    return (
     <>
       <NavBar />

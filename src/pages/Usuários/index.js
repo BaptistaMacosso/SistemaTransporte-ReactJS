@@ -48,6 +48,7 @@ const Usuarios = () => {
         tipoUsuarioId: user.tipoUsuarioId || '',
         grupoUsuarioId: user.grupoUsuarioId || ''
       });
+      toast.warn("Esta funcionalidade ainda está em desenvolvimento. Pedimos desculpas por qualquer inconveniente causado e agradecemos sua compreensão. Estamos trabalhando para disponibilizá-la o mais breve possível!");
     } else {
       setIsEdit(true);
       setNovoUsuario({

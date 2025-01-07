@@ -132,28 +132,6 @@ const PedidoAsistenciaTecnica = () => {
     }
   };
 
-  //Confirmar Pedido
-  const handleConfirmarPedido = async () => {
-    try {
-      
-    } catch (error) {
-      if (error.response.status === 500) {
-        toast.error(error.response.data.message);
-      }
-    }
-  };
-
-  //Rejeitar Pedido
-  const handleRejeitarPedido = async () => {
-    try {
-      
-    } catch (error) {
-      if (error.response.status === 500) {
-        toast.error(error.response.data.message);
-      }
-    }
-  };
-
   //Rejeitar Pedido
   const handleDeletePedido = async (pedidos) => {
     try {
