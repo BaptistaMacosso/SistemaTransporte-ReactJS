@@ -66,12 +66,13 @@ const DetalhePerfilUsuario = () => {
                 <Card sx={{ mt: 2 }}>
                     <CardContent>
                     <Paper sx={{ padding: 3 }}>
-                    <Typography variant="h5" gutterBottom>Perfíl do Usuário #{usuario.userId}</Typography>
+                    <Typography variant="h5" gutterBottom>Código do Usuário #{usuario.userId}</Typography>
                     <Typography><strong>Nome de Usuário:</strong> {usuario.userNome}</Typography>
                     <Typography><strong>E-mail:</strong> {usuario.userEmail}</Typography>
                     <Typography><strong>Perfíl do Usuário:</strong> {usuario.tipoUser?.descricaoTipo}</Typography>
+                    <Typography><strong>Grupo do Usuário:</strong> {usuario.grupoUser?.grupoName}</Typography>
                     <Box mt={2} />
-                    <Typography><strong>Página em Construção</strong></Typography>
+                    <Typography><strong>Privilégios do Usuário</strong></Typography>
                     </Paper>
                     </CardContent>
                 </Card>

@@ -52,6 +52,17 @@ export const editarUsuario = async (id, usuario, token) => {
   return response.data;
 };
 
+export const alterarPasswordUsuario = async (id, newPassword, oldPassword, token) => {
+  const response = await axios.put(`${API_BASE_URL}/usuario/alterarPassword/${id}`, 
+    {newPassword, oldPassword}, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  return response;
+};
+
 export const deletarUsuario = async (id, token) => {
   const response = await axios.delete(`${API_BASE_URL}/usuario/delete/${id}`, {
     headers: { 

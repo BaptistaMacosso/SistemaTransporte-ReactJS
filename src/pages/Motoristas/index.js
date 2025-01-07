@@ -128,11 +128,11 @@ const Motoristas = () => {
         }else{
           try{
             const response = await inserirMotorista(NovoMotorista,token);
-            if(response.status === 201){
-              toast.success(response.data.message);
+            if(response){
+              toast.success(response.message);
               fetchMotoristas();
             }else{
-              toast.error(response.data.message);
+              toast.error(response.message);
             }
           }catch(error){
             toast.error('Erro: não foi possível salvar o motorista. Verifique os detalhes no console.');
@@ -146,12 +146,12 @@ const Motoristas = () => {
     //Editar Motorista
     const handleEdit = async () =>{
       try{
-        const response = await editarMotorista(NovoMotorista,token);
-        if(response.status === 201){
-          toast.success(response.data.message);
+        const response = await editarMotorista(NovoMotorista.motoristaId,NovoMotorista,token);
+        if(response){
+          toast.success(response.message);
           fetchMotoristas();
         }else{
-          toast.error(response.data.message);
+          toast.error(response.message);
         }
       }catch(error){
         toast.error('Erro: não foi possível editar o motorista. Verifique os detalhes no console.');
@@ -164,11 +164,11 @@ const Motoristas = () => {
       if (window.confirm('Tem certeza que deseja excluir este Motorista?')) {
         try {
           const response = await deletarMotorista(motorista.motoristaId,token);
-          if(response.status === 201) {
-            toast.success(response.data.message);
+          if(response) {
+            toast.success(response.message);
             fetchMotoristas();
           }else{
-            toast.error(response.data.message);
+            toast.error(response.message);
           }
         } catch (error) {
           toast.error('Erro: não foi possível excluir o motorista. Verifica os detalhes no console.');
@@ -281,7 +281,7 @@ const Motoristas = () => {
 
           {/* Modal de Adicionar Nova Viatura */}
           <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>{isEdit===true ? 'Editar Motorista' : 'Adicionar Novo Motorista' }</DialogTitle>
+            <DialogTitle>{isEdit ? 'Editar Motorista' : 'Adicionar Novo Motorista' }</DialogTitle>
             <DialogContent>
               <Grid2 item size={12}>
                 <TextField
@@ -349,7 +349,7 @@ const Motoristas = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose} color="secondary">Cancelar</Button>
-              <Button onClick={handleSave} color="primary">{isEdit===true ? 'Salvar Alterações' : 'Adicionar' }</Button>
+              <Button onClick={handleSave} color="primary">{isEdit ? 'Salvar Alterações' : 'Adicionar' }</Button>
             </DialogActions>
           </Dialog>
         {/**/}

@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { AuthContext, useAuth } from '../../contexts/auth';
 import axios from 'axios';
 import { H7 } from './styles';
+import { loginUsuario } from '../../services/userService';
 
 const Signin = () => {
   // Recupera o token do contexto de autenticação ou localStorage
@@ -35,28 +36,28 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      if (!novoUsuario.userEmail || !novoUsuario.userPassword) {
-        toast.warn("O preenchamento de todos os campos é obrigatório!");
-        return;
-      };
-      const response = await axios.post('https://sistema-transporte-backend.vercel.app/api/auth/login',
-        novoUsuario,{
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if(response.status === 201) {
-          login(response.data.token);
-          navigate('/Home');
-        }else if(response.status === 400 || response.status === 401 || response.status === 404){
-          toast.error(response.data.message);
-      }
-    } catch (err) {
-      if(err.response.status === 500){
-        toast.error(err.response.data.message);
-      }
+    // Validação inicial
+    if (!novoUsuario.userEmail || !novoUsuario.userPassword) {
+      toast.warn("Todos os campos são de preenchimento obrigatório!");
+      return;
     };
+
+    try {
+      const response = await loginUsuario(novoUsuario);
+      if (response?.token) {
+        login(response.token);
+        navigate('/Home');
+      } 
+    } catch (error) {
+      if(error.status === 401 || error.status === 404 || error.status === 400){
+        toast.warn(error.response.data.message+" Verifica as credenciais e tente novamente.");
+        return;
+      }else if(error.status === 500){
+        toast.error(error.response.data.message);
+        console.error("Detalhes do erro: ", error?.response || error);
+        return;
+      }
+    }
   };
 
   return (
@@ -94,13 +95,11 @@ const Signin = () => {
               />
             </Box>
             <Box marginBottom={2}>
-              <Button type="submit" variant="contained" color="primary" fullWidth>
-                Entrar
-              </Button>
+              <Button type="submit" variant="contained" color="primary" fullWidth>Entrar</Button>
             </Box>
           </form>
           <Typography variant="body2" color="textSecondary" align="center">
-           <H7>&copy; Desenvolvido por: Fluente Systems.</H7> 
+           <H7>&copy;2024 - Todos os direitos reservados.</H7> 
           </Typography>
         </CardContent>
       </Card>

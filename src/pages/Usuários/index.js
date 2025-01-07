@@ -10,9 +10,9 @@ import { Card,Typography,Table,TableBody,TableCell,TableContainer,TableHead,Tabl
   Select,
   MenuItem,
   Stack,
-  CardContent
+  CardContent,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Badge } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Badge, Password } from '@mui/icons-material';
 import { AuthContext } from '../../contexts/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -29,7 +29,7 @@ const Usuarios = () => {
   const [loading, setLoading] = useState(true); // Estado para gerenciar o carregamento.
   const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
   const [filtro, setFiltro] = useState(''); // Lista de usuários filtrada.
-  const nagivate = useNavigate();
+  const navigate = useNavigate();
 
 
   // Função para abrir o modal para adicionar ou editar
@@ -41,7 +41,8 @@ const Usuarios = () => {
         userNome: user.userNome || '',
         userEmail: user.userEmail || '',
         userPassword: user.userPassword || '',
-        tipoUsuarioId: user.tipoUsuarioId || ''
+        tipoUsuarioId: user.tipoUsuarioId || '',
+        GrupoUsuarioId: user.grupoUsuarioId || ''
       });
     } else {
       setIsEdit(true);
@@ -50,7 +51,8 @@ const Usuarios = () => {
         userNome: user.userNome,
         userEmail: user.userEmail,
         userPassword: user.userPassword,
-        tipoUsuarioId: user.tipoUsuarioId
+        tipoUsuarioId: user.tipoUsuarioId,
+        GrupoUsuarioId: user.grupoUsuarioId
       });
     }
     setOpen(true);
@@ -167,7 +169,7 @@ const Usuarios = () => {
     if (!isAuthenticated) {
       logout(); // Remove o token
       // Redirecionamento para página de login
-      nagivate('/login');
+      navigate('/login');
     }else{
       fetchUsers();
     }
@@ -215,7 +217,8 @@ const Usuarios = () => {
                           <TableCell>Código</TableCell>
                           <TableCell>Nome Usuário</TableCell>
                           <TableCell>Endereço de E-mail</TableCell>
-                          <TableCell>Tipo de Usuário</TableCell>
+                          <TableCell>Perfíl do Usuário</TableCell>
+                          <TableCell>Grupo do Usuário</TableCell>
                           <TableCell align="center">Ações</TableCell>
                         </TableRow>
                       </TableHead>
@@ -228,14 +231,20 @@ const Usuarios = () => {
                               <TableCell>{user.userNome}</TableCell>
                               <TableCell>{user.userEmail}</TableCell>
                               <TableCell>{user.tipoUser.descricaoTipo}</TableCell>
+                              <TableCell>{user.grupoUser.grupoName}</TableCell>
                               <TableCell align="center">
                                 <Tooltip title="Editar">
                                   <IconButton color="primary" onClick={() => handleOpen(user)}>
                                     <EditIcon />
                                   </IconButton>
                                 </Tooltip>
+                                <Tooltip title="Alterar Password">
+                                  <IconButton color="error" onClick={() => navigate(`/AlterarPasswordUsuario/${user.userId}`)}>
+                                    <Password />
+                                  </IconButton>
+                                </Tooltip>
                                 <Tooltip title="Perfíl do Usuário">
-                                  <IconButton color="success" onClick={() => nagivate(`/DetalhePerfilUsuario/${user.userId}`)}>
+                                  <IconButton color="success" onClick={() => navigate(`/DetalhePerfilUsuario/${user.userId}`)}>
                                     <Badge/>
                                   </IconButton>
                                 </Tooltip>
@@ -315,7 +324,7 @@ const Usuarios = () => {
                 <Button onClick={handleClose} color="secondary">Cancelar</Button>
                 <Button onClick={handleSave} color="primary">{isEdit ? 'Salvar Alterações' : 'Adicionar' }</Button>
               </DialogActions>
-            </Dialog>        
+            </Dialog>      
 
         </Box>
       </Box>

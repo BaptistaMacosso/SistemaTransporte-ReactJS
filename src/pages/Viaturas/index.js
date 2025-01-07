@@ -161,19 +161,19 @@ const Viaturas = () => {
   //Salvar Viatura
   const CriarViatura = async() =>{
     try{
-      const data = await inserirViatura(novaViatura, token);
-      if(data.status === 201){
-        toast.success(data.data.message);
+      const response = await inserirViatura(novaViatura, token);
+      if(response){
+        toast.success(response.message);
         fetchViaturas();
       }
-      else if(data.status === 400){
-        toast.success(data.data.message);
+      else if(response.status === 400){
+        toast.success(response.message);
       }
     }catch(error){
       if(error.status === 400){
-        toast.error(error.response.data.message+"!");
+        toast.error(error.response.message+"!");
       }else if(error.status === 500){
-        toast.error(error.response.data.message);
+        toast.error(error.response.message);
       }
     }
     fetchViaturas();
@@ -187,15 +187,15 @@ const Viaturas = () => {
     } else {
       try{
         const response = await editarViatura(novaViatura.viaturaId, novaViatura, token);
-        if(response.status === 201){
-          toast.success(response.data.message);
+        if(response){
+          toast.success(response.message);
           fetchViaturas();
         }
       }catch(error){
         if(error.status === 404){
-          toast.success(error.response.data.message+"!");
+          toast.success(error.response.message+"!");
         }else if(error.status === 500){
-          toast.error(error.response.data.message);
+          toast.error(error.response.message);
         }
       }
     }
@@ -207,15 +207,15 @@ const Viaturas = () => {
     if(window.confirm('Tem certeza que deseja excluir esta viatura?')){
       try{
         const response = await deletarViatura(viatura.viaturaId, token);
-        if(response.status === 200){
-          toast.success(response.data.message);
+        if(response){
+          toast.success(response.message);
           fetchViaturas();
         }
       }catch(error){
           if (error.status === 404) {
-            toast.error(error.response.data.message);
+            toast.error(error.response.message);
           } else if (error.status === 500) {
-            toast.error(error.response.data.message);
+            toast.error(error.response.message);
           } 
       };
       fetchViaturas();
