@@ -17,18 +17,22 @@ import { AuthContext } from '../../contexts/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { deletarUsuario, editarUsuario, inserirUsuario, listarUsuarios } from '../../services/userService';
+import { listarTipoUsuario } from '../../services/userTipoService';
+import { listarGrupoUsuario } from '../../services/grupoUserService';
 
 
 const Usuarios = () => {
   // Recupera o token do contexto de autenticação ou localStorage
   const { token } = useContext(AuthContext) || { token: localStorage.getItem('token') };
-  const [novoUsuario, setNovoUsuario] = useState({userId: null, userNome: '', userEmail: '', userPassword: '', tipoUsuarioId: '' });
+  const [novoUsuario, setNovoUsuario] = useState({userId: null, userNome: '', userEmail: '', userPassword: '', tipoUsuarioId: '', grupoUsuarioId: '' });
   const { isAuthenticated, logout } = useContext(AuthContext);
   const [users, setUsers] = useState([]); // Estado para armazenar a lista de usuários.
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true); // Estado para gerenciar o carregamento.
   const [isEdit, setIsEdit] = useState(false); // Indica se é modo edição.
   const [filtro, setFiltro] = useState(''); // Lista de usuários filtrada.
+  const [tipoUsuarios, setTipoUsuarios] = useState([]);
+  const [grupoUsuarios, setGrupoUsuarios] = useState([]);
   const navigate = useNavigate();
 
 
@@ -42,7 +46,7 @@ const Usuarios = () => {
         userEmail: user.userEmail || '',
         userPassword: user.userPassword || '',
         tipoUsuarioId: user.tipoUsuarioId || '',
-        GrupoUsuarioId: user.grupoUsuarioId || ''
+        grupoUsuarioId: user.grupoUsuarioId || ''
       });
     } else {
       setIsEdit(true);
@@ -52,7 +56,7 @@ const Usuarios = () => {
         userEmail: user.userEmail,
         userPassword: user.userPassword,
         tipoUsuarioId: user.tipoUsuarioId,
-        GrupoUsuarioId: user.grupoUsuarioId
+        grupoUsuarioId: user.grupoUsuarioId
       });
     }
     setOpen(true);
@@ -117,7 +121,9 @@ const Usuarios = () => {
   //Criar Usuários
   const handleNovoUsuario = async () => {
     try {
+      console.log(novoUsuario);
           const response = await inserirUsuario(novoUsuario, token);
+          console.log("Resposta: "+response);
           if(response.status === 201){
             toast.success(response.message);
             fetchUsers();
@@ -164,6 +170,40 @@ const Usuarios = () => {
     }
   };
 
+   //Listar Tipo Usuário
+    const getTipoUsuario = async () => {
+      try {
+        const response = await listarTipoUsuario(token);
+        if(response){
+          setTipoUsuarios(response);
+        }else{
+          toast.warn("Nenhum tipo de usuário encontrado ou formato inesperado.");
+          setTipoUsuarios([]);
+        }
+      } catch (error) {
+        if (error.response.status === 500) {
+          toast.error(error.response.data.message);
+        }
+      }
+    };
+
+     //Listar Grupo Usuário
+      const getGrupoUsuario = async () => {
+        try {
+          const response = await listarGrupoUsuario(token);
+          if(response){
+            setGrupoUsuarios(response);
+          }else{
+            toast.warn("Nenhum grupo de usuário encontrado ou formato inesperado.");
+            setGrupoUsuarios([]);
+          }
+        } catch (error) {
+          if (error.response.status === 500) {
+            toast.error(error.response.data.message);
+          }
+        }
+      };
+
   //UseEffect
   useEffect(() => {
     if (!isAuthenticated) {
@@ -172,6 +212,8 @@ const Usuarios = () => {
       navigate('/login');
     }else{
       fetchUsers();
+      getTipoUsuario();
+      getGrupoUsuario();
     }
   }, [isAuthenticated, logout]);
 
@@ -313,9 +355,27 @@ const Usuarios = () => {
                     label="Tipo de Usuário"
                     onChange={handleChange}
                   >
-                    <MenuItem value={1}>Administrador</MenuItem>
-                    <MenuItem value={2}>Motorista</MenuItem>
-                    <MenuItem value={3}>Mecânico</MenuItem>
+                    {tipoUsuarios.map((userTipo) => (
+                        <MenuItem value={userTipo.tipoId}>
+                        {userTipo.descricaoTipo}
+                        </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth sx={{ marginBottom: 2, marginTop: 1 }}>
+                  <InputLabel id="role-select-label">Grupo de Usuário</InputLabel>
+                  <Select
+                    labelId="role-select-label"
+                    name="grupoUsuarioId"
+                    value={novoUsuario.grupoUsuarioId}
+                    label="Grupo de Usuário"
+                    onChange={handleChange}
+                  >
+                    {grupoUsuarios.map((grupoUser) => (
+                        <MenuItem value={grupoUser.grupoId}>
+                        {grupoUser.grupoName}
+                        </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </>)}

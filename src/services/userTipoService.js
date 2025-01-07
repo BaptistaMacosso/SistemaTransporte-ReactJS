@@ -1,35 +1,37 @@
-import api from '../api/apiConfig';
+import API_BASE_URL from '../api/apiConfig';
+import axios from 'axios';
 
-export const listarTiposUsuarios = async (token) => {
-  const response = await api.get('/viaturatipo/listar', {
-    headers: { Authorization: `Bearer ${token}` },
+export const listarTipoUsuario = async (token) => {
+  const response = await axios.get(`${API_BASE_URL}/usuariotipo/listar`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
-  return Array.isArray(response.data?.tipos) ? response.data.tipos : [];
+  if(response.data && Array.isArray(response.data.listaUser)){
+    return response.data.listaUser;
+  }else{
+    return [];
+  }
 };
 
-export const buscarTipoUsuarioPorId = async (id, token) => {
-  const response = await api.get(`/viaturatipo/listarPorId/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
 
-export const inserirTipoUsuario = async (tipo, token) => {
-  const response = await api.post('/viaturatipo/novo', tipo, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const editarTipoUsuario = async (id, tipo, token) => {
-  const response = await api.put(`/viaturatipo/update/${id}`, tipo, {
-    headers: { Authorization: `Bearer ${token}` },
+export const inserirTipoUsuario = async (tipoUsuario, token) => {
+  const response = await axios.post(`${API_BASE_URL}/usuariotipo/novo`, tipoUsuario, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
   return response.data;
 };
 
 export const deletarTipoUsuario = async (id, token) => {
-  await api.delete(`/viaturatipo/delete/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await axios.delete(`${API_BASE_URL}/usuariotipo/delete/${id}`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
+  return response.data;
 };

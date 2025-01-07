@@ -33,6 +33,7 @@ export const buscarUsuarioPorId = async (userId, token) => {
 };
 
 export const inserirUsuario = async (usuario, token) => {
+  console.log("Aqui... "+usuario);
   const response = await axios.post(`${API_BASE_URL}/usuario/novo`, usuario, {
     headers: { 
       Authorization: `Bearer ${token}`,
