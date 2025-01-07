@@ -176,6 +176,10 @@ const Motoristas = () => {
         }
       }
     };
+
+    const handleOpenMotoristaAtribuir = async(motorista)=>{
+      toast.warn("Esta funcionalidade ainda está em desenvolvimento. Pedimos desculpas por qualquer inconveniente causado e agradecemos sua compreensão. Estamos trabalhando para disponibilizá-la o mais breve possível!");
+    };
     //...........................................................
 
    return (
@@ -244,7 +248,7 @@ const Motoristas = () => {
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Atribuir Viatura">
-                                <IconButton color="sucess" onClick={() => handleOpen(motorista)}>
+                                <IconButton color="sucess" onClick={() => handleOpenMotoristaAtribuir(motorista)}>
                                 <AirlineStops />
                                 </IconButton>
                             </Tooltip>
