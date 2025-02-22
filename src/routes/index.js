@@ -17,7 +17,7 @@ import PedidoAsistenciaTecnica from '../pages/PedidoAsistenciaTecnica';
 import DetalhesPedidoAsistenciaTecnica from '../pages/PedidoAsistenciaTecnica/DetalhesPedidoAsistenciaTecnica';
 import DetalhePerfilUsuario from '../pages/Usuários/PerfilUsuario';
 import AlterarPasswordUsuario from '../pages/Usuários/alterarPasswordUsuario';
-import CadastroMotorista from '../pages/Motoristas/cadastro';
+import CadastroMotorista from '../pages/Motoristas/cadastroMotorista';
 
 //Elemento que irá verificar se o usuário 
 //está logado ou não antes de acessar a pagina home.
