@@ -26,7 +26,7 @@ const Motoristas = () => {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [filtro, setFiltro] = useState('');
-    const { navigate } = useNavigate();
+    const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5); // Número de linhas por página
 
