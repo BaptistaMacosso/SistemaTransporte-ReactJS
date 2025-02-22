@@ -34,7 +34,7 @@ const RoutesApp = () => {
             <Routes>
                 <Route exact path='/Home' element={<Private Item={Home} />} />
                 <Route exact path='/Motoristas' element={<Private Item={Motoristas} />} />
-                <Route exact path='/Motoristas/NovoMotorista' element={<Private Item={CadastroMotorista} />} />
+                <Route exact path='/NovoMotorista' element={<Private Item={CadastroMotorista} />} />
                 <Route exact path='/CheckViatura' element={<Private Item={ChecklistViatura} />} />
                 <Route exact path='/LicencaPublicidade' element={<Private Item={LicencaPublicidade} />} />
                 <Route exact path='/LicencaTransporte' element={<Private Item={LicencaTransporte} />} />
