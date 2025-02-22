@@ -17,6 +17,7 @@ import PedidoAsistenciaTecnica from '../pages/PedidoAsistenciaTecnica';
 import DetalhesPedidoAsistenciaTecnica from '../pages/PedidoAsistenciaTecnica/DetalhesPedidoAsistenciaTecnica';
 import DetalhePerfilUsuario from '../pages/Usuários/PerfilUsuario';
 import AlterarPasswordUsuario from '../pages/Usuários/alterarPasswordUsuario';
+import CadastroMotorista from '../pages/Motoristas/cadastro';
 
 //Elemento que irá verificar se o usuário 
 //está logado ou não antes de acessar a pagina home.
@@ -33,6 +34,7 @@ const RoutesApp = () => {
             <Routes>
                 <Route exact path='/Home' element={<Private Item={Home} />} />
                 <Route exact path='/Motoristas' element={<Private Item={Motoristas} />} />
+                <Route exact path='/Motoristas/NovoMotorista' element={<Private Item={CadastroMotorista} />} />
                 <Route exact path='/CheckViatura' element={<Private Item={ChecklistViatura} />} />
                 <Route exact path='/LicencaPublicidade' element={<Private Item={LicencaPublicidade} />} />
                 <Route exact path='/LicencaTransporte' element={<Private Item={LicencaTransporte} />} />

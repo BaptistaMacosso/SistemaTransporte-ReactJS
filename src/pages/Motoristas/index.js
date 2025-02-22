@@ -201,7 +201,7 @@ const Motoristas = () => {
                     onChange={handleSearch}
                     sx={{ marginBottom: 2 }}
                   />
-                  <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpen}>
+                  <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => navigate('/Motoristas/NovoMotorista')}>
                     Novo Motorista
                   </Button>
               </Grid2>
